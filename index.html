@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Supplemente">
-<title>Supplemente v1 — Bioenergetische Frequenzarbeit</title>
+<title>Supplemente v3 — Bioenergetische Frequenzarbeit</title>
 <style>
   :root {
     --royal:    #1565C0;
@@ -94,6 +94,12 @@
   .item.done { border-color:var(--gruen); background:var(--gruen-bg); }
   .item.done .check { background:var(--gruen); border-color:var(--gruen); }
   .item.done .nm { text-decoration:line-through; color:#7a8a7e; }
+  .warn { display:flex; align-items:flex-start; gap:0.5rem; background:#FFF6E5; border:1px solid #F1D08A;
+    border-left:4px solid #E8A400; border-radius:14px; padding:0.6rem 0.8rem; margin:0 0 0.55rem;
+    font-size:0.82rem; color:#6b4e00; line-height:1.4; }
+  .warn .wic { font-size:1rem; line-height:1.2; }
+  .warn b { color:#8a4b00; font-weight:800; }
+  .warn .wtx { display:block; margin-top:0.12rem; color:#7a5e10; font-weight:600; }
 
   .mini-actions { margin-top:0.5rem; }
   .reset-day { font-size:0.78rem; color:#9aa7b5; background:none; border:none; cursor:pointer; text-decoration:underline; padding:0.3rem 0; }
@@ -123,11 +129,11 @@
   .slot-pick { display:flex; gap:0.4rem; flex-wrap:wrap; justify-content:center; }
   .slot-opt { flex:1; min-width:70px; text-align:center; padding:0.55rem 0.3rem; border-radius:10px; border:1.5px solid #cdd9e6; background:var(--weiss); font-size:0.85rem; font-weight:700; color:var(--dunkel); cursor:pointer; user-select:none; }
   .slot-opt.on { background:var(--royal); color:#fff; border-color:var(--royal); }
-  .form-actions { display:flex; gap:0.5rem; margin-top:0.5rem; }
-  .btn { flex:1; padding:0.7rem; border-radius:10px; border:none; font-size:0.92rem; font-weight:800; cursor:pointer; }
+  .form-actions { display:flex; gap:0.4rem; margin-top:0.5rem; }
+  .btn { flex:1 1 0; min-width:0; padding:0.42rem 0.3rem; border-radius:8px; border:none; font-size:0.76rem; font-weight:700; cursor:pointer; white-space:nowrap; }
   .btn.save { background:var(--royal); color:#fff; }
   .btn.cancel { background:#eef2f6; color:#5a6b7c; }
-  .btn.del { background:#FDECEC; color:#C0392B; flex:0 0 auto; padding:0.7rem 1rem; }
+  .btn.del { background:#FDECEC; color:#C0392B; }
 
   /* ─── VERLAUF ─── */
   .verlauf-intro { font-size:0.86rem; color:#4a5b70; margin:0 0 0.9rem; }
@@ -190,6 +196,52 @@ const SLOTS = [
   { id:'nacht',  label:'Nacht',  ic:'🌙', hint:'vor dem Schlafen' }
 ];
 const SLOT_LABEL = Object.fromEntries(SLOTS.map(s=>[s.id,s.label]));
+
+/* ═══ WECHSELWIRKUNGEN — im selben Zeitfenster zeitlich trennen ═══ */
+const NUT_MATCH = [
+  { key:'eisen',     rx:/eisen|ferro/i },
+  { key:'magnesium', rx:/magnesium/i },
+  { key:'kalzium',   rx:/kalzium|calcium|kalk/i },
+  { key:'zink',      rx:/zink|zinc/i },
+  { key:'kupfer',    rx:/kupfer|copper/i }
+];
+const CONFLICTS = {
+  'eisen|magnesium':'hemmen sich gegenseitig bei der Aufnahme – mind. 2 Std. Abstand.',
+  'eisen|kalzium':  'Kalzium hemmt die Eisenaufnahme stark – mind. 2 Std. Abstand.',
+  'eisen|zink':     'konkurrieren um denselben Aufnahmeweg – zeitlich trennen.',
+  'kalzium|zink':   'Kalzium hemmt die Zinkaufnahme – zeitlich trennen.',
+  'kupfer|zink':    'Zink senkt Kupfer bei Dauereinnahme – zeitlich trennen, Verhältnis beachten.'
+};
+function nutKeysOf(name){ return NUT_MATCH.filter(m=>m.rx.test(name||'')).map(m=>m.key); }
+function conflictNote(k1,k2){ return CONFLICTS[[k1,k2].sort().join('|')] || null; }
+function slotConflicts(items){
+  const en = items.map(p=>({ p, keys:nutKeysOf(p.name) }));
+  const out = [], seen = {};
+  for(let i=0;i<en.length;i++){ for(let j=i+1;j<en.length;j++){
+    for(const k1 of en[i].keys){ for(const k2 of en[j].keys){
+      const note = conflictNote(k1,k2);
+      if(note){
+        const sig = en[i].p.id+'|'+en[j].p.id;
+        if(seen[sig]) continue; seen[sig]=1;
+        out.push({ a:en[i].p.name, b:en[j].p.name, note });
+      }
+    }}
+  }}
+  return out;
+}
+function allPlanConflicts(){
+  const en = state.plan.map(p=>({ p, keys:nutKeysOf(p.name) }));
+  const out = [], seen = {};
+  for(let i=0;i<en.length;i++){ for(let j=i+1;j<en.length;j++){
+    for(const k1 of en[i].keys){ for(const k2 of en[j].keys){
+      const note = conflictNote(k1,k2); if(!note) continue;
+      const sig = en[i].p.id+'|'+en[j].p.id; if(seen[sig]) continue; seen[sig]=1;
+      const shared = (en[i].p.slots||[]).filter(s=>(en[j].p.slots||[]).includes(s)).map(s=>SLOT_LABEL[s]);
+      out.push({ where: shared.length ? shared.join(', ')+': ' : '', a:en[i].p.name, b:en[j].p.name, note });
+    }}
+  }}
+  return out;
+}
 
 /* ═══ HILFSFUNKTIONEN ═══ */
 function uid(){ return 'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
@@ -266,6 +318,9 @@ function renderHeute(){
     html += `<div class="slot"><div class="slot-head">
       <span class="ic">${sl.ic}</span><span class="name">${sl.label}</span>
       <span class="hint">· ${sl.hint}</span></div>`;
+    slotConflicts(slotItems).forEach(c=>{
+      html += `<div class="warn"><span class="wic">⚠️</span><span><b>${esc(c.a)} + ${esc(c.b)}</b><span class="wtx">${esc(c.note)}</span></span></div>`;
+    });
     slotItems.forEach(p=>{
       const d = isDone(p.id, sl.id);
       html += `<div class="item ${d?'done':''}" data-id="${p.id}" data-slot="${sl.id}">
@@ -297,6 +352,9 @@ function renderHeute(){
 function renderPlan(){
   headTitel.textContent = 'Supplemente · Plan';
   let html = `<p class="plan-intro">Hier verwaltest du, was du nimmst. Tippe auf <b>Bearbeiten</b> oder lege unten ein neues Supplement an.</p>`;
+  allPlanConflicts().forEach(c=>{
+    html += `<div class="warn"><span class="wic">⚠️</span><span><b>${esc(c.where)}${esc(c.a)} + ${esc(c.b)}</b><span class="wtx">${esc(c.note)}</span></span></div>`;
+  });
   if(editing){ html += planForm(); }
 
   if(state.plan.length===0 && !editing){
@@ -370,7 +428,7 @@ function bindPlan(){
 
   const dl = document.getElementById('f-del');
   if(dl){ let armedD=false; dl.onclick = ()=>{
-    if(!armedD){ armedD=true; dl.textContent='Wirklich löschen?'; setTimeout(()=>{ armedD=false; dl.textContent='Löschen'; }, 3000); return; }
+    if(!armedD){ armedD=true; dl.textContent='Wirklich?'; setTimeout(()=>{ armedD=false; dl.textContent='Löschen'; }, 3000); return; }
     state.plan = state.plan.filter(x=>x.id!==editing);
     save(); editing=null; renderPlan();
   }; }
