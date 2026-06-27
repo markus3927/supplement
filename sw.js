@@ -1,6 +1,6 @@
 // Service Worker – Supplemente (Bioenergetische Frequenzarbeit)
 // Bei jeder neuen Version diese Zahl hochzählen (v8 -> v9 ...).
-const CACHE = 'supplemente-v10';
+const CACHE = 'supplemente-v14';
 const ASSETS = ['/', '/manifest.webmanifest'];
 
 self.addEventListener('install', (e) => {

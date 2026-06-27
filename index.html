@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Supplemente">
-<title>Supplemente v10 — Bioenergetische Frequenzarbeit</title>
+<title>Supplemente v14 — Bioenergetische Frequenzarbeit</title>
 <style>
   :root {
     --royal:    #1565C0;
@@ -187,6 +187,7 @@
     #printArea{ display:block !important; }
     @page{ margin:14mm; }
   }
+  .bl-grp{ font-size:0.72rem;font-weight:800;color:#1565C0;text-transform:uppercase;letter-spacing:0.04em;margin:0.75rem 0 0.3rem; }
 </style>
 </head>
 <body>
@@ -342,6 +343,8 @@ if(!state.seeded){
 }
 if(!Array.isArray(state.meds)) state.meds = [];
 if(typeof state.medsFree !== "string") state.medsFree = "";
+if(!state.log || typeof state.log !== "object") state.log = {};
+(function(){ let ch=false; (state.plan||[]).forEach(p=>{ if(p.note){ const c=p.note.replace(/\s*·?\s*⚠\s*mit Arzt\/Apotheke (?:abkl[aä]ren|kl[aä]ren)[\s\S]*$/,"").trim(); if(c!==p.note){ p.note=c; ch=true; } } }); if(ch) save(); })();
 
 let mode = 'heute';
 let editing = null;
@@ -417,11 +420,9 @@ function renderHeute(){
     el.onclick = ()=>{ toggleDone(el.dataset.id, el.dataset.slot); renderHeute(); };
   });
   const rb = document.getElementById('resetDay');
-  let armedR = false;
   rb.onclick = ()=>{
-    if(!armedR){ armedR = true; rb.textContent = 'Wirklich? Nochmal tippen'; rb.style.color = '#C0392B';
-      setTimeout(()=>{ armedR=false; rb.textContent='Heute zurücksetzen'; rb.style.color=''; }, 3000); return; }
-    delete state.log[todayKey()]; save(); renderHeute();
+    let ok=true; try{ ok = window.confirm('Alle Häkchen von heute zurücksetzen?'); }catch(e){ ok=true; }
+    if(ok){ if(!state.log) state.log={}; delete state.log[todayKey()]; save(); renderHeute(); }
   };
 }
 
@@ -657,14 +658,49 @@ const SYMPTOMS_A = [
 
 /* Blutwerte: Schweizer SI-Einheiten + Muster zum Auslesen aus dem Laborbericht. */
 const BLOOD_TESTS = [
-  { key:"ferritin", label:"Ferritin",            unit:"µg/l",   low:30,   high:300, nut:"eisen",     rx:[/ferritin[\s\S]{0,25}?(\d+(?:[.,]\d+)?)\s*(?:[µμu]g|ng|mcg)/i, /ferritin[\s\S]{0,20}?(\d+(?:[.,]\d+)?)/i] },
-  { key:"vitd",     label:"Vitamin D (25-OH)",   unit:"nmol/l", low:75,   high:250, nut:"d",         rx:[/25[\s-]?oh[\s\S]{0,30}?(\d+(?:[.,]\d+)?)\s*(?:nmol|ng)/i, /vitamin[\s-]*d[\s-]*3?\b[\s\S]{0,30}?(\d+(?:[.,]\d+)?)\s*(?:nmol|ng)/i, /calcidiol[\s\S]{0,25}?(\d+(?:[.,]\d+)?)\s*(?:nmol|ng)/i] },
-  { key:"holotc",   label:"Vitamin B12 (Holo-TC)",unit:"pmol/l",low:35,   high:null,nut:"b12",       rx:[/holo[\s-]?(?:tc|transcobalamin)[\s\S]{0,25}?(\d+(?:[.,]\d+)?)\s*pmol/i, /holo[\s-]?(?:tc|transcobalamin)[\s\S]{0,20}?(\d+(?:[.,]\d+)?)/i, /aktives?\s*b\s*-?\s*12[\s\S]{0,20}?(\d+(?:[.,]\d+)?)/i] },
-  { key:"folat",    label:"Folsäure (Folat)",    unit:"nmol/l", low:10,   high:null,nut:"folsaeure", rx:[/fol(?:s(?:ae|[aä])ure|at)[\s\S]{0,25}?(\d+(?:[.,]\d+)?)\s*(?:nmol|ng)/i, /fol(?:s(?:ae|[aä])ure|at)[\s\S]{0,20}?(\d+(?:[.,]\d+)?)/i] },
-  { key:"mg",       label:"Magnesium (Serum)",   unit:"mmol/l", low:0.75, high:1.05,nut:"magnesium", rx:[/magnesium[\s\S]{0,25}?(\d+(?:[.,]\d+)?)\s*mmol/i, /magnesium[\s\S]{0,20}?(\d+(?:[.,]\d+)?)/i] },
-  { key:"zink",     label:"Zink",                unit:"µmol/l", low:11,   high:18,  nut:"zink",      rx:[/zink[\s\S]{0,25}?(\d+(?:[.,]\d+)?)\s*(?:[µμu]mol)/i, /zink[\s\S]{0,20}?(\d+(?:[.,]\d+)?)/i] },
-  { key:"selen",    label:"Selen",               unit:"µg/l",   low:80,   high:140, nut:"selen",     rx:[/selen[\s\S]{0,25}?(\d+(?:[.,]\d+)?)\s*(?:[µμu]g|nmol)/i, /selen[\s\S]{0,20}?(\d+(?:[.,]\d+)?)/i] },
-  { key:"kalium",   label:"Kalium",              unit:"mmol/l", low:3.6,  high:5.2, nut:"kalium",    rx:[/kalium[\s\S]{0,25}?(\d+(?:[.,]\d+)?)\s*mmol/i, /kalium[\s\S]{0,20}?(\d+(?:[.,]\d+)?)/i] }
+  // Eisenstatus & Blutbild
+  { key:"ferritin", label:"Ferritin", unit:"µg/l", low:30, high:300, nut:"eisen", field:true, grp:"Eisenstatus & Blutbild", rx:[/ferritin[\s\S]{0,25}?(\d+(?:[.,]\d+)?)\s*(?:[µμu]g|ng|mcg)/i, /ferritin[\s\S]{0,18}?(\d+(?:[.,]\d+)?)/i] },
+  { key:"eisen", label:"Eisen (Serum)", unit:"µmol/l", low:10, high:30, nut:"eisen", field:true, grp:"Eisenstatus & Blutbild", rx:[/(?:serum[\s-]?)?eisen\b[\s\S]{0,22}?(\d+(?:[.,]\d+)?)\s*[µμu]mol/i, /(?:serum[\s-]?)?eisen\b[\s\S]{0,16}?(\d+(?:[.,]\d+)?)/i] },
+  { key:"tfs", label:"Transferrinsättigung", unit:"%", low:16, high:45, nut:"eisen", field:true, grp:"Eisenstatus & Blutbild", rx:[/(?:transferrin|eisen)s(?:ae|[aä])ttigung[\s\S]{0,22}?(\d+(?:[.,]\d+)?)\s*%/i, /(?:transferrin|eisen)s(?:ae|[aä])ttigung[\s\S]{0,16}?(\d+(?:[.,]\d+)?)/i] },
+  { key:"hb", label:"Hämoglobin", unit:"g/l", low:120, high:175, nut:"eisen", field:true, grp:"Eisenstatus & Blutbild", rx:[/(?:h(?:ae|[aä])moglobin|\bhb\b)[\s\S]{0,18}?(\d{2,3}(?:[.,]\d+)?)\s*g\/l/i] },
+  { key:"leuko", label:"Leukozyten", unit:"G/l", low:4, high:10, nut:null, field:false, grp:"Eisenstatus & Blutbild", rx:[/leukozyten[\s\S]{0,20}?(\d+(?:[.,]\d+)?)/i] },
+  { key:"thrombo", label:"Thrombozyten", unit:"G/l", low:150, high:400, nut:null, field:false, grp:"Eisenstatus & Blutbild", rx:[/thrombozyten[\s\S]{0,20}?(\d+(?:[.,]\d+)?)/i] },
+  // Vitamine
+  { key:"vitd", label:"Vitamin D (25-OH)", unit:"nmol/l", low:75, high:250, nut:"d", field:true, grp:"Vitamine", rx:[/25[\s-]?oh[\s\S]{0,30}?(\d+(?:[.,]\d+)?)\s*(?:nmol|ng)/i, /vitamin[\s-]*d[\s-]*3?\b[\s\S]{0,30}?(\d+(?:[.,]\d+)?)\s*(?:nmol|ng)/i, /calcidiol[\s\S]{0,25}?(\d+(?:[.,]\d+)?)\s*(?:nmol|ng)/i] },
+  { key:"holotc", label:"Vitamin B12 (Holo-TC)", unit:"pmol/l", low:35, high:null, nut:"b12", field:true, grp:"Vitamine", rx:[/holo[\s-]?(?:tc|transcobalamin)[\s\S]{0,25}?(\d+(?:[.,]\d+)?)\s*pmol/i, /holo[\s-]?(?:tc|transcobalamin)[\s\S]{0,20}?(\d+(?:[.,]\d+)?)/i] },
+  { key:"folat", label:"Folsäure (Folat)", unit:"nmol/l", low:10, high:null, nut:"folsaeure", field:true, grp:"Vitamine", rx:[/fol(?:s(?:ae|[aä])ure|at)[\s\S]{0,25}?(\d+(?:[.,]\d+)?)\s*(?:nmol|ng)/i, /fol(?:s(?:ae|[aä])ure|at)[\s\S]{0,20}?(\d+(?:[.,]\d+)?)/i] },
+  { key:"b6", label:"Vitamin B6", unit:"µg/l", low:5, high:null, nut:"b6", field:true, grp:"Vitamine", rx:[/(?:vitamin\s*b\s*-?\s*6\b|pyridoxin)[\s\S]{0,22}?(\d+(?:[.,]\d+)?)\s*(?:[µμu]g|nmol)/i, /(?:vitamin\s*b\s*-?\s*6\b|pyridoxin)[\s\S]{0,16}?(\d+(?:[.,]\d+)?)/i] },
+  { key:"vite", label:"Vitamin E", unit:"µmol/l", low:12, high:42, nut:"e", field:true, grp:"Vitamine", rx:[/(?:vitamin\s*e\b|tocopherol)[\s\S]{0,22}?(\d+(?:[.,]\d+)?)\s*(?:[µμu]mol|mg)/i, /(?:vitamin\s*e\b|tocopherol)[\s\S]{0,16}?(\d+(?:[.,]\d+)?)/i] },
+  { key:"vitc", label:"Vitamin C", unit:"µmol/l", low:26, high:null, nut:"c", field:true, grp:"Vitamine", rx:[/(?:vitamin\s*c\b|ascorbin)[\s\S]{0,22}?(\d+(?:[.,]\d+)?)\s*(?:[µμu]mol|mg)/i, /(?:vitamin\s*c\b|ascorbin)[\s\S]{0,16}?(\d+(?:[.,]\d+)?)/i] },
+  { key:"homocystein", label:"Homocystein", unit:"µmol/l", low:null, high:12, nut:null, field:true, grp:"Vitamine", rx:[/homocyste[\s\S]{0,22}?(\d+(?:[.,]\d+)?)\s*[µμu]mol/i, /homocyste[\s\S]{0,16}?(\d+(?:[.,]\d+)?)/i] },
+  // Mineralien & Elektrolyte
+  { key:"magnesium", label:"Magnesium", unit:"mmol/l", low:0.75, high:1.05, nut:"magnesium", field:true, grp:"Mineralien & Elektrolyte", rx:[/magnesium[\s\S]{0,22}?(\d+(?:[.,]\d+)?)\s*mmol/i, /magnesium[\s\S]{0,16}?(\d+(?:[.,]\d+)?)/i] },
+  { key:"kalzium", label:"Kalzium", unit:"mmol/l", low:2.2, high:2.6, nut:"kalzium", field:true, grp:"Mineralien & Elektrolyte", rx:[/(?:kalzium|calcium)[\s\S]{0,22}?(\d+(?:[.,]\d+)?)\s*mmol/i, /(?:kalzium|calcium)[\s\S]{0,16}?(\d+(?:[.,]\d+)?)/i] },
+  { key:"kalium", label:"Kalium", unit:"mmol/l", low:3.6, high:5.2, nut:"kalium", field:true, grp:"Mineralien & Elektrolyte", rx:[/kalium[\s\S]{0,22}?(\d+(?:[.,]\d+)?)\s*mmol/i, /kalium[\s\S]{0,16}?(\d+(?:[.,]\d+)?)/i] },
+  { key:"natrium", label:"Natrium", unit:"mmol/l", low:135, high:145, nut:null, field:true, grp:"Mineralien & Elektrolyte", rx:[/natrium[\s\S]{0,22}?(\d+(?:[.,]\d+)?)\s*mmol/i, /natrium[\s\S]{0,16}?(\d+(?:[.,]\d+)?)/i] },
+  { key:"zink", label:"Zink", unit:"µmol/l", low:11, high:18, nut:"zink", field:true, grp:"Mineralien & Elektrolyte", rx:[/zink[\s\S]{0,22}?(\d+(?:[.,]\d+)?)\s*[µμu]mol/i, /zink[\s\S]{0,16}?(\d+(?:[.,]\d+)?)/i] },
+  { key:"selen", label:"Selen", unit:"µg/l", low:80, high:140, nut:"selen", field:true, grp:"Mineralien & Elektrolyte", rx:[/selen[\s\S]{0,22}?(\d+(?:[.,]\d+)?)\s*(?:[µμu]g|nmol)/i, /selen[\s\S]{0,16}?(\d+(?:[.,]\d+)?)/i] },
+  { key:"kupfer", label:"Kupfer", unit:"µmol/l", low:11, high:22, nut:"kupfer", field:true, grp:"Mineralien & Elektrolyte", rx:[/(?:kupfer|copper)[\s\S]{0,22}?(\d+(?:[.,]\d+)?)\s*[µμu]mol/i, /(?:kupfer|copper)[\s\S]{0,16}?(\d+(?:[.,]\d+)?)/i] },
+  { key:"phosphat", label:"Phosphat", unit:"mmol/l", low:0.8, high:1.5, nut:null, field:true, grp:"Mineralien & Elektrolyte", rx:[/phosphat[\s\S]{0,22}?(\d+(?:[.,]\d+)?)\s*mmol/i, /phosphat[\s\S]{0,16}?(\d+(?:[.,]\d+)?)/i] },
+  // Schilddrüse
+  { key:"tsh", label:"TSH", unit:"mU/l", low:0.4, high:4.0, nut:null, field:false, grp:"Schilddrüse", rx:[/(?:tsh\b|thyreotropin)[\s\S]{0,22}?(\d+(?:[.,]\d+)?)\s*(?:m?[µμu]?[uU]\/(?:l|ml))/i, /(?:tsh\b|thyreotropin)[\s\S]{0,16}?(\d+(?:[.,]\d+)?)/i] },
+  { key:"ft4", label:"fT4 (freies T4)", unit:"pmol/l", low:12, high:22, nut:null, field:false, grp:"Schilddrüse", rx:[/(?:ft[\s-]?4|freies?\s*t4)[\s\S]{0,20}?(\d+(?:[.,]\d+)?)/i] },
+  { key:"ft3", label:"fT3 (freies T3)", unit:"pmol/l", low:3.1, high:6.8, nut:null, field:false, grp:"Schilddrüse", rx:[/(?:ft[\s-]?3|freies?\s*t3)[\s\S]{0,20}?(\d+(?:[.,]\d+)?)/i] },
+  // Stoffwechsel
+  { key:"glukose", label:"Glukose (nüchtern)", unit:"mmol/l", low:3.9, high:5.6, nut:null, field:false, grp:"Stoffwechsel & Fette", rx:[/(?:glu[ck]ose|n[üu]chternzucker)[\s\S]{0,20}?(\d+(?:[.,]\d+)?)\s*mmol/i, /(?:glu[ck]ose)[\s\S]{0,16}?(\d+(?:[.,]\d+)?)/i] },
+  { key:"hba1c", label:"HbA1c", unit:"%", low:null, high:5.7, nut:null, field:false, grp:"Stoffwechsel & Fette", rx:[/hba1c[\s\S]{0,20}?(\d+(?:[.,]\d+)?)\s*%/i, /hba1c[\s\S]{0,16}?(\d+(?:[.,]\d+)?)/i] },
+  { key:"chol", label:"Cholesterin (gesamt)", unit:"mmol/l", low:null, high:5.0, nut:null, field:false, grp:"Stoffwechsel & Fette", rx:[/(?:gesamt[\s-]?cholesterin|cholesterin[\s,]*(?:gesamt|total))[\s\S]{0,20}?(\d+(?:[.,]\d+)?)/i] },
+  { key:"ldl", label:"LDL-Cholesterin", unit:"mmol/l", low:null, high:3.0, nut:null, field:false, grp:"Stoffwechsel & Fette", rx:[/ldl[\s\S]{0,20}?(\d+(?:[.,]\d+)?)\s*mmol/i, /ldl[\s\S]{0,14}?(\d+(?:[.,]\d+)?)/i] },
+  { key:"hdl", label:"HDL-Cholesterin", unit:"mmol/l", low:1.0, high:null, nut:null, field:false, grp:"Stoffwechsel & Fette", rx:[/hdl[\s\S]{0,20}?(\d+(?:[.,]\d+)?)\s*mmol/i, /hdl[\s\S]{0,14}?(\d+(?:[.,]\d+)?)/i] },
+  { key:"trigly", label:"Triglyceride", unit:"mmol/l", low:null, high:1.7, nut:null, field:false, grp:"Stoffwechsel & Fette", rx:[/triglycerid[\s\S]{0,20}?(\d+(?:[.,]\d+)?)/i] },
+  // Niere & Leber & Entzündung
+  { key:"krea", label:"Kreatinin", unit:"µmol/l", low:45, high:105, nut:null, field:false, grp:"Niere, Leber & Entzündung", rx:[/kreatinin[\s\S]{0,20}?(\d+(?:[.,]\d+)?)\s*[µμu]mol/i, /kreatinin[\s\S]{0,16}?(\d+(?:[.,]\d+)?)/i] },
+  { key:"egfr", label:"eGFR", unit:"ml/min", low:90, high:null, nut:null, field:false, grp:"Niere, Leber & Entzündung", rx:[/e?gfr[\s\S]{0,20}?(\d+(?:[.,]\d+)?)/i] },
+  { key:"harnsaeure", label:"Harnsäure", unit:"µmol/l", low:null, high:420, nut:null, field:false, grp:"Niere, Leber & Entzündung", rx:[/harns(?:ae|[aä])ure[\s\S]{0,20}?(\d+(?:[.,]\d+)?)\s*[µμu]mol/i, /harns(?:ae|[aä])ure[\s\S]{0,16}?(\d+(?:[.,]\d+)?)/i] },
+  { key:"crp", label:"CRP", unit:"mg/l", low:null, high:5, nut:null, field:false, grp:"Niere, Leber & Entzündung", rx:[/(?:crp\b|c-?reaktives)[\s\S]{0,20}?(\d+(?:[.,]\d+)?)\s*mg/i, /(?:crp\b|c-?reaktives)[\s\S]{0,16}?(\d+(?:[.,]\d+)?)/i] },
+  { key:"alat", label:"ALAT (GPT)", unit:"U/l", low:null, high:50, nut:null, field:false, grp:"Niere, Leber & Entzündung", rx:[/(?:alat|gpt|alanin-?amino)[\s\S]{0,20}?(\d+(?:[.,]\d+)?)/i] },
+  { key:"asat", label:"ASAT (GOT)", unit:"U/l", low:null, high:50, nut:null, field:false, grp:"Niere, Leber & Entzündung", rx:[/(?:asat|got|aspartat-?amino)[\s\S]{0,20}?(\d+(?:[.,]\d+)?)/i] },
+  { key:"ggt", label:"Gamma-GT", unit:"U/l", low:null, high:60, nut:null, field:false, grp:"Niere, Leber & Entzündung", rx:[/(?:ggt|gamma-?gt|γ-?gt)[\s\S]{0,20}?(\d+(?:[.,]\d+)?)/i] }
 ];
 
 const MED_CATS = [
@@ -717,11 +753,13 @@ function medItemWarnHtml(name){
   const w=medWarnForItem(name); if(!w) return "";
   return '<div class="pi-warn">\u26a0 mit Arzt/Apotheke abkl\u00e4ren'+(w.labels.length?" ("+w.labels.map(esc).join(", ")+")":"")+'</div>';
 }
+function clearMeds(){ state.meds=[]; state.medsFree=""; aMed=new Set(); aMedFree=""; save(); render(); }
+function medClearLink(){ return ' <a href="#" onclick="clearMeds();return false;" style="display:inline-block;margin-top:6px;font-size:0.78rem;font-weight:700;color:#1565C0;text-decoration:underline;">Medikamente entfernen</a>'; }
 function medBanner(){
   const meds=activeMeds(); if(!meds.length) return "";
   const block=meds.filter(m=>m.sev==="block");
-  if(block.length){ return '<div class="a-danger"><b>\u26a0 Achtung \u2013 Medikamente hinterlegt</b><br>Wegen: '+block.map(m=>esc(m.label)).join(", ")+'. Jede Erg\u00e4nzung individuell mit dem Behandlungsteam abkl\u00e4ren \u2013 die App ersetzt das nicht.</div>'; }
-  return '<div class="warn"><span class="wic">\u26a0\ufe0f</span><span><b>Medikamente hinterlegt</b><span class="wtx">'+meds.map(m=>esc(m.label)).join(", ")+' \u2013 markierte Supplemente mit Arzt/Apotheke abkl\u00e4ren.</span></span></div>';
+  if(block.length){ return '<div class="a-danger"><b>\u26a0 Achtung \u2013 Medikamente hinterlegt</b> <span style="font-weight:400;font-size:0.8rem;">(aus der Analyse)</span><br>Wegen: '+block.map(m=>esc(m.label)).join(", ")+'. Jede Erg\u00e4nzung individuell mit dem Behandlungsteam abkl\u00e4ren \u2013 die App ersetzt das nicht.'+medClearLink()+'</div>'; }
+  return '<div class="warn"><span class="wic">\u26a0\ufe0f</span><span><b>Medikamente hinterlegt</b> <span style="font-weight:400;">(aus der Analyse)</span><span class="wtx">'+meds.map(m=>esc(m.label)).join(", ")+' \u2013 markierte Supplemente mit Arzt/Apotheke abkl\u00e4ren.</span>'+medClearLink()+'</span></div>';
 }
 let aSel = new Set();
 let aBlood = {};
@@ -754,20 +792,23 @@ function aSchedule(keys){
 
 function aScore(){
   const score={}, reason={}, suppress={};
-  const add=(k,w,why)=>{ if(suppress[k]) return; score[k]=(score[k]||0)+w; (reason[k]=reason[k]||[]).push(why); };
+  const add=(k,w,why)=>{ if(!k || suppress[k]) return; score[k]=(score[k]||0)+w; (reason[k]=reason[k]||[]).push(why); };
   aSel.forEach(i=>{ const sy=SYMPTOMS_A[i]; sy.def.forEach(d=> add(d.n, A_W[d.s], sy.name)); });
   const blood=[];
   BLOOD_TESTS.forEach(b=>{
     const raw=aBlood[b.key]; if(raw==null || raw==="") return;
     const v=parseFloat(String(raw).replace(",",".")); if(isNaN(v)) return;
     let st="ok";
-    if(v < b.low) st="tief";
+    if(b.low!=null && v < b.low) st="tief";
     else if(b.high!=null && v > b.high) st="hoch";
-    blood.push({label:b.label, unit:b.unit, val:v, status:st});
-    if(st==="tief"){ add(b.nut, 5, "Blutwert "+b.label+" tief"); }
-    if(st==="hoch"){ suppress[b.nut]=true; delete score[b.nut]; }
+    blood.push({label:b.label, unit:b.unit, val:v, status:st, nut:b.nut||null});
+    if(b.nut){
+      if(st==="tief"){ add(b.nut, 5, "Blutwert "+b.label+" tief"); }
+      if(st==="hoch"){ suppress[b.nut]=true; delete score[b.nut]; }
+    }
+    if(b.key==="homocystein" && st==="hoch"){ add("b12",4,"Homocystein erhöht"); add("folsaeure",4,"Homocystein erhöht"); add("b6",3,"Homocystein erhöht"); }
   });
-  let keys=Object.keys(score).filter(k=>!suppress[k] && score[k]>=2);
+  let keys=Object.keys(score).filter(k=>!suppress[k] && score[k]>=2 && CAT[k]);
   keys.sort((a,b)=> score[b]-score[a] || CAT[a].name.localeCompare(CAT[b].name,"de"));
   keys=keys.slice(0,14);
   const place=aSchedule(keys);
@@ -838,14 +879,15 @@ function renderAnalyse(){
   SYMPTOMS_A.forEach((sy,i)=>{ h += '<span class="a-chip'+(aSel.has(i)?' sel':'')+'" data-sym="'+i+'">'+esc(sy.name)+'</span>'; });
   h += '</div></div>';
   h += '<div class="a-sec"><div class="a-h">2 · Blutbild</div>';
-  h += '<div class="a-sub">Laborbericht hier einfügen (Text aus dem PDF kopieren) – ich lese die Werte automatisch aus. Du kannst sie danach von Hand korrigieren.</div>';
+  h += '<div class="a-sub">Ganzen Laborbericht einfügen oder als Text-PDF importieren – die App erkennt automatisch viele Werte (Eisenstatus, Vitamine, Mineralien, Schilddrüse, Leber, Niere, Fette …). Die supplement-relevanten kannst du unten von Hand korrigieren. Referenzbereiche sind Richtwerte und können je nach Labor abweichen.</div>';
   h += '<textarea class="bl-paste" id="aPaste" rows="4" placeholder="z. B. Ferritin 23 µg/l (30–300)\nVitamin D 48 nmol/l\nZink 9.5 µmol/l ..."></textarea>';
   h += '<label class="a-btn2 file" id="aPdfBtn" style="width:100%;margin:0 0 0.45rem;"><input type="file" id="aPdf" accept="application/pdf,.pdf" hidden>📑 PDF importieren</label>';
   h += '<div class="a-btn-row"><button class="a-btn2" id="aParse">⤵ Text auslesen</button><label class="a-btn2 file"><input type="file" id="aFile" accept=".txt,.csv,text/plain" hidden>📄 Textdatei</label></div>';
-  h += '<div class="blood-grid">';
-  BLOOD_TESTS.forEach(b=>{
-    const val = (aBlood[b.key]!=null ? aBlood[b.key] : "");
-    h += '<div class="bl-row"><span class="bl-lab">'+esc(b.label)+'</span><input class="bl-in" id="bl_'+b.key+'" inputmode="decimal" placeholder="–" value="'+esc(String(val))+'"><span class="bl-un">'+esc(b.unit)+'</span></div>';
+  const _grps={}; BLOOD_TESTS.filter(b=>b.field).forEach(b=>{ (_grps[b.grp]=_grps[b.grp]||[]).push(b); });
+  Object.keys(_grps).forEach(g=>{
+    h += '<div class="bl-grp">'+esc(g)+'</div><div class="blood-grid">';
+    _grps[g].forEach(b=>{ const val=(aBlood[b.key]!=null?aBlood[b.key]:""); h += '<div class="bl-row"><span class="bl-lab">'+esc(b.label)+'</span><input class="bl-in" id="bl_'+b.key+'" inputmode="decimal" placeholder="–" value="'+esc(String(val))+'"><span class="bl-un">'+esc(b.unit)+'</span></div>'; });
+    h += '</div>';
   });
   h += '</div><div class="bl-hint">📑 Text-PDF wird automatisch ausgelesen (Internet nötig). Ein Foto oder eingescanntes PDF ohne Textebene kann die App nicht lesen – das schickst du mir am besten direkt im Chat, dann nenne ich dir die Werte zum Eintragen. Vitamin D in nmol/l (ng/ml × 2,5 = nmol/l).</div></div>';
   h += '<div class="a-sec"><div class="a-h">3 · Medikamente / Vorerkrankungen</div>';
@@ -874,6 +916,7 @@ function renderAnalyse(){
 }
 
 function aRunAnalysis(){
+  const _pe=document.getElementById("aPaste"); if(_pe && _pe.value.trim()){ aParseReport(_pe.value); }
   BLOOD_TESTS.forEach(b=>{ const el=document.getElementById("bl_"+b.key); if(el){ const v=el.value.trim(); aBlood[b.key]= (v===""?null:v); } });
   const mf=document.getElementById("aMedFree"); if(mf) aMedFree=mf.value.trim();
   state.meds=[...aMed]; state.medsFree=aMedFree; save();
@@ -890,6 +933,7 @@ function aRunAnalysis(){
     h += '<div class="a-sec"><div class="a-h">Blutwerte</div>';
     res.blood.forEach(b=>{ const cls=b.status==="tief"?"bf-low":(b.status==="hoch"?"bf-high":"bf-ok"); const tag=b.status==="tief"?"tief":(b.status==="hoch"?"hoch":"im Zielbereich");
       h += '<div class="bf '+cls+'"><span>'+esc(b.label)+': <b>'+b.val+" "+esc(b.unit)+'</b></span><span class="bf-tag">'+tag+'</span></div>'; });
+    if(res.blood.some(b=>!b.nut && b.status!=="ok")){ h += '<div class="bl-hint">Werte ausserhalb des Bereichs ohne direkten Supplement-Bezug (z. B. Leber, Niere, Schilddrüse) bitte ärztlich einordnen lassen.</div>'; }
     h += '</div>';
   }
   if(!res.recs.length){
@@ -918,8 +962,7 @@ function aApply(recs, affected){
   affected=affected||{};
   recs.forEach(r=>{
     const nm=CAT[r.key].name, ck=CAT[r.key].ck;
-    let note=r.note||"";
-    if(affected[r.key]){ note=(note?note+" · ":"")+"⚠ mit Arzt/Apotheke klären ("+affected[r.key].join("; ")+")"; }
+    const note=r.note||"";
     let ex = state.plan.find(p=> p.name.toLowerCase()===nm.toLowerCase() || (ck && nutKeysOf(p.name).indexOf(ck)>=0));
     if(ex){ ex.slots=[r.slot]; if(note) ex.note=note; }
     else { state.plan.push({ id:uid(), name:nm, dose:"", slots:[r.slot], note:note }); }
