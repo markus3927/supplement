@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Supplemente">
-<title>Supplemente v14 — Bioenergetische Frequenzarbeit</title>
+<title>Supplemente v15 — Bioenergetische Frequenzarbeit</title>
 <style>
   :root {
     --royal:    #1565C0;
@@ -188,6 +188,12 @@
     @page{ margin:14mm; }
   }
   .bl-grp{ font-size:0.72rem;font-weight:800;color:#1565C0;text-transform:uppercase;letter-spacing:0.04em;margin:0.75rem 0 0.3rem; }
+  .mode-kunde, .mode-ich{ padding:0.5rem 1rem; display:flex; align-items:center; gap:0.65rem; flex-wrap:wrap; }
+  .mode-kunde{ background:#FFF4E6; border-bottom:1px solid #f0d9b5; }
+  .mode-badge{ font-size:0.78rem; font-weight:800; color:#a8650c; }
+  .mode-btn{ font-size:0.78rem; font-weight:700; color:#fff; background:#1565C0; border:none; border-radius:8px; padding:0.32rem 0.7rem; cursor:pointer; }
+  .mode-link{ font-size:0.78rem; font-weight:600; color:#1565C0; text-decoration:underline; cursor:pointer; }
+  .mode-ich{ justify-content:flex-end; }
 </style>
 </head>
 <body>
@@ -202,6 +208,7 @@
   </div>
   <div class="accent"></div>
 </header>
+<div id="modeBar"></div>
 
 
 <main>
@@ -221,7 +228,9 @@
 
 <script>
 /* ═══ SPEICHER (localStorage mit Fallback) ═══ */
-const KEY = 'supplemente_v1';
+const _qs = new URLSearchParams(location.search);
+const CLIENT_MODE = _qs.has('kunde') || location.hash.indexOf('kunde')>=0;
+const KEY = CLIENT_MODE ? 'supplemente_kunde' : 'supplemente_v1';
 let memFallback = null;
 function load(){
   try { const raw = localStorage.getItem(KEY); return raw ? JSON.parse(raw) : null; }
@@ -333,11 +342,7 @@ function langDatum(d){
 let state = load();
 if(!state){ state = { plan:[], log:{}, seeded:false }; }
 if(!state.seeded){
-  state.plan = [
-    { id:uid(), name:'Vitamin D3 + K2', dose:'4000 IE', slots:['morgen'], note:'zur Mahlzeit mit Fett' },
-    { id:uid(), name:'Omega-3',         dose:'2 Kapseln', slots:['mittag'], note:'zum Essen' },
-    { id:uid(), name:'Magnesium',       dose:'300 mg',  slots:['abend'],  note:'entspannend, abends gut' }
-  ];
+  state.plan = [];
   state.seeded = true;
   save();
 }
@@ -754,6 +759,24 @@ function medItemWarnHtml(name){
   return '<div class="pi-warn">\u26a0 mit Arzt/Apotheke abkl\u00e4ren'+(w.labels.length?" ("+w.labels.map(esc).join(", ")+")":"")+'</div>';
 }
 function clearMeds(){ state.meds=[]; state.medsFree=""; aMed=new Set(); aMedFree=""; save(); render(); }
+function resetClient(){
+  let ok=true; try{ ok=window.confirm('Für einen neuen Kunden zurücksetzen? Plan, Medikamente und Häkchen werden geleert.'); }catch(e){ ok=true; }
+  if(!ok) return;
+  state.plan=[]; state.meds=[]; state.medsFree=""; state.log={}; state.seeded=true;
+  aMed=new Set(); aMedFree=""; aSel=new Set(); aBlood={};
+  save(); mode='heute';
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active', x.dataset.mode==='heute'));
+  render(); window.scrollTo({top:0,behavior:'smooth'});
+}
+function goPersonal(){ location.href = location.pathname; }
+function renderModeBar(){
+  const mb=document.getElementById('modeBar'); if(!mb) return;
+  if(CLIENT_MODE){
+    mb.innerHTML='<div class="mode-kunde"><span class="mode-badge">👤 Kunden-Modus</span><button class="mode-btn" onclick="resetClient();return false;">Neuer Kunde</button><a class="mode-link" onclick="goPersonal();return false;">Zurück zu meinen Daten</a></div>';
+  } else {
+    mb.innerHTML='<div class="mode-ich"><a class="mode-link" href="?kunde">👤 Für einen Kunden öffnen</a></div>';
+  }
+}
 function medClearLink(){ return ' <a href="#" onclick="clearMeds();return false;" style="display:inline-block;margin-top:6px;font-size:0.78rem;font-weight:700;color:#1565C0;text-decoration:underline;">Medikamente entfernen</a>'; }
 function medBanner(){
   const meds=activeMeds(); if(!meds.length) return "";
@@ -996,6 +1019,7 @@ function aCopySummary(res, med){
 
 /* ═══ NAVIGATION ═══ */
 function render(){
+  renderModeBar();
   if(mode==='heute') renderHeute();
   else if(mode==='plan') renderPlan();
   else if(mode==='analyse') renderAnalyse();
