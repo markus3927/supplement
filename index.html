@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Supplemente">
-<title>Supplemente v15 — Bioenergetische Frequenzarbeit</title>
+<title>Supplemente v16 — Bioenergetische Frequenzarbeit</title>
 <style>
   :root {
     --royal:    #1565C0;
@@ -229,8 +229,8 @@
 <script>
 /* ═══ SPEICHER (localStorage mit Fallback) ═══ */
 const _qs = new URLSearchParams(location.search);
-const CLIENT_MODE = _qs.has('kunde') || location.hash.indexOf('kunde')>=0;
-const KEY = CLIENT_MODE ? 'supplemente_kunde' : 'supplemente_v1';
+let CLIENT_MODE = _qs.has('kunde') || location.hash.indexOf('kunde')>=0;
+let KEY = CLIENT_MODE ? 'supplemente_kunde' : 'supplemente_v1';
 let memFallback = null;
 function load(){
   try { const raw = localStorage.getItem(KEY); return raw ? JSON.parse(raw) : null; }
@@ -339,17 +339,18 @@ function langDatum(d){
 }
 
 /* ═══ STATE ═══ */
-let state = load();
-if(!state){ state = { plan:[], log:{}, seeded:false }; }
-if(!state.seeded){
-  state.plan = [];
-  state.seeded = true;
-  save();
+function normalizeState(st){
+  if(!st || typeof st!=="object"){ st = { plan:[], log:{}, seeded:true }; }
+  if(!Array.isArray(st.plan)) st.plan = [];
+  st.seeded = true;
+  if(!Array.isArray(st.meds)) st.meds = [];
+  if(typeof st.medsFree !== "string") st.medsFree = "";
+  if(!st.log || typeof st.log !== "object") st.log = {};
+  st.plan.forEach(p=>{ if(p && p.note){ const c=p.note.replace(/\s*·?\s*⚠\s*mit Arzt\/Apotheke (?:abkl[aä]ren|kl[aä]ren)[\s\S]*$/,"").trim(); if(c!==p.note) p.note=c; } });
+  return st;
 }
-if(!Array.isArray(state.meds)) state.meds = [];
-if(typeof state.medsFree !== "string") state.medsFree = "";
-if(!state.log || typeof state.log !== "object") state.log = {};
-(function(){ let ch=false; (state.plan||[]).forEach(p=>{ if(p.note){ const c=p.note.replace(/\s*·?\s*⚠\s*mit Arzt\/Apotheke (?:abkl[aä]ren|kl[aä]ren)[\s\S]*$/,"").trim(); if(c!==p.note){ p.note=c; ch=true; } } }); if(ch) save(); })();
+let state = normalizeState(load());
+save();
 
 let mode = 'heute';
 let editing = null;
@@ -768,13 +769,24 @@ function resetClient(){
   document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active', x.dataset.mode==='heute'));
   render(); window.scrollTo({top:0,behavior:'smooth'});
 }
-function goPersonal(){ location.href = location.pathname; }
+function switchMode(toClient){
+  save();
+  CLIENT_MODE = !!toClient;
+  KEY = CLIENT_MODE ? 'supplemente_kunde' : 'supplemente_v1';
+  try{ history.replaceState(null, '', CLIENT_MODE ? (location.pathname+'?kunde') : location.pathname); }catch(e){}
+  state = normalizeState(load());
+  aSel=new Set(); aBlood={}; aMed=new Set(state.meds||[]); aMedFree=state.medsFree||"";
+  editing=null; mode='heute';
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active', x.dataset.mode==='heute'));
+  render(); window.scrollTo({top:0,behavior:'smooth'});
+}
+function goPersonal(){ switchMode(false); }
 function renderModeBar(){
   const mb=document.getElementById('modeBar'); if(!mb) return;
   if(CLIENT_MODE){
-    mb.innerHTML='<div class="mode-kunde"><span class="mode-badge">👤 Kunden-Modus</span><button class="mode-btn" onclick="resetClient();return false;">Neuer Kunde</button><a class="mode-link" onclick="goPersonal();return false;">Zurück zu meinen Daten</a></div>';
+    mb.innerHTML='<div class="mode-kunde"><span class="mode-badge">👤 Kunden-Modus</span><button class="mode-btn" onclick="resetClient();return false;">Neuer Kunde</button><a class="mode-link" onclick="switchMode(false);return false;">Zurück zu meinen Daten</a></div>';
   } else {
-    mb.innerHTML='<div class="mode-ich"><a class="mode-link" href="?kunde">👤 Für einen Kunden öffnen</a></div>';
+    mb.innerHTML='';
   }
 }
 function medClearLink(){ return ' <a href="#" onclick="clearMeds();return false;" style="display:inline-block;margin-top:6px;font-size:0.78rem;font-weight:700;color:#1565C0;text-decoration:underline;">Medikamente entfernen</a>'; }
