@@ -1,37 +1,54 @@
-/* Service Worker — Supplemente
-   Bioenergetische Frequenzarbeit / Markus Rufer
-   Network-first: zeigt immer die aktuelle Version, Cache nur als Offline-Reserve.
-   Bei jedem App-Update die Versionsnummer unten erhöhen (v1 -> v2 ...),
-   damit alte zwischengespeicherte Dateien sauber ersetzt werden. */
+// Service Worker – Supplemente (Bioenergetische Frequenzarbeit)
+// Bei jeder neuen Version diese Zahl hochzählen (v8 -> v9 ...).
+const CACHE = 'supplemente-v10';
+const ASSETS = ['/', '/manifest.webmanifest'];
 
-const CACHE = 'supplemente-v1';
-const CORE = [
-  '/', '/index.html', '/manifest.webmanifest',
-  '/icon-192.png', '/icon-512.png', '/icon-maskable-512.png', '/apple-touch-icon.png'
-];
-
-self.addEventListener('install', e => {
+self.addEventListener('install', (e) => {
   self.skipWaiting();
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE).catch(() => {})));
+  e.waitUntil(
+    caches.open(CACHE).then((c) => Promise.allSettled(ASSETS.map((u) => c.add(u))))
+  );
 });
 
-self.addEventListener('activate', e => {
+self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
 
-self.addEventListener('fetch', e => {
-  if (e.request.method !== 'GET') return;
+self.addEventListener('fetch', (e) => {
+  const req = e.request;
+  if (req.method !== 'GET') return;
+
+  // HTML / Seitenaufruf: immer zuerst aus dem Netz (frische Version), sonst Cache.
+  if (req.mode === 'navigate' || (req.headers.get('accept') || '').includes('text/html')) {
+    e.respondWith(
+      fetch(req)
+        .then((res) => {
+          const copy = res.clone();
+          caches.open(CACHE).then((c) => c.put(req, copy));
+          return res;
+        })
+        .catch(() => caches.match(req).then((r) => r || caches.match('/')))
+    );
+    return;
+  }
+
+  // Übrige Dateien (Icons, Manifest, ...): zuerst Cache, sonst Netz und cachen.
   e.respondWith(
-    fetch(e.request)
-      .then(r => {
-        const copy = r.clone();
-        caches.open(CACHE).then(c => c.put(e.request, copy)).catch(() => {});
-        return r;
-      })
-      .catch(() => caches.match(e.request).then(m => m || caches.match('/index.html')))
+    caches.match(req).then((cached) =>
+      cached ||
+      fetch(req)
+        .then((res) => {
+          if (res && res.status === 200 && res.type === 'basic') {
+            const copy = res.clone();
+            caches.open(CACHE).then((c) => c.put(req, copy));
+          }
+          return res;
+        })
+        .catch(() => cached)
+    )
   );
 });

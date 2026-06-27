@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Supplemente">
-<title>Supplemente v3 — Bioenergetische Frequenzarbeit</title>
+<title>Supplemente v10 — Bioenergetische Frequenzarbeit</title>
 <style>
   :root {
     --royal:    #1565C0;
@@ -146,6 +146,47 @@
   .vrow .vnum { width:46px; text-align:right; font-size:0.78rem; color:#6a7a8c; flex-shrink:0; }
 
   footer { font-size:0.68rem; color:#9aa7b5; padding:1.4rem 1rem 0; line-height:1.5; }
+
+  /* ─── ANALYSE ─── */
+  .a-note{ background:#FFF6E5;border:1px solid #F1D08A;color:#7a5e10;border-radius:10px;padding:0.6rem 0.7rem;font-size:0.82rem;font-weight:600;margin-bottom:0.9rem;line-height:1.4; }
+  .a-sec{ background:var(--weiss);border:1.5px solid var(--hellblau);border-radius:14px;padding:0.8rem 0.9rem;margin-bottom:1rem; }
+  .a-h{ font-weight:800;color:var(--royal);font-size:0.92rem;margin-bottom:0.6rem; }
+  .a-sub{ font-size:0.8rem;color:#5a6b7a;margin-bottom:0.5rem;line-height:1.35; }
+  .a-chips{ display:flex;flex-wrap:wrap;gap:0.35rem; }
+  .a-chip{ padding:0.4rem 0.7rem;border-radius:999px;border:1.5px solid var(--hellblau);background:#f4f9fe;color:var(--dunkel);font-size:0.82rem;font-weight:600;cursor:pointer; }
+  .a-chip.sel{ background:var(--royal);color:#fff;border-color:var(--royal); }
+  .bl-paste{ width:100%;border:1.5px solid var(--hellblau);border-radius:10px;padding:0.55rem 0.6rem;font-size:0.85rem;font-family:inherit;resize:vertical;box-sizing:border-box; }
+  .a-btn-row{ display:flex;gap:0.4rem;margin:0.5rem 0 0.8rem; }
+  .a-btn2{ flex:1;text-align:center;padding:0.55rem;border-radius:10px;border:1.5px solid var(--royal);background:#eef6fd;color:var(--royal);font-size:0.82rem;font-weight:700;cursor:pointer; }
+  .a-btn2.file{ display:inline-flex;align-items:center;justify-content:center; }
+  .blood-grid{ display:flex;flex-direction:column;gap:0.4rem; }
+  .bl-row{ display:flex;align-items:center;gap:0.5rem; }
+  .bl-lab{ flex:1;font-size:0.85rem;font-weight:600;color:var(--text); }
+  .bl-in{ width:5.4rem;padding:0.4rem 0.5rem;border:1.5px solid var(--hellblau);border-radius:8px;font-size:0.9rem;text-align:right; }
+  .bl-un{ width:3.8rem;font-size:0.76rem;color:#789; }
+  .bl-hint{ font-size:0.74rem;color:#789;margin-top:0.5rem;line-height:1.35; }
+  .bf{ display:flex;justify-content:space-between;align-items:center;padding:0.45rem 0.6rem;border-radius:9px;margin-bottom:0.35rem;font-size:0.86rem; }
+  .bf-low{ background:#FFE9E5;border:1px solid #f0b3a8; } .bf-low .bf-tag{ color:#b23030;font-weight:800; }
+  .bf-high{ background:#FFF1D6;border:1px solid #e8c886; } .bf-high .bf-tag{ color:#a86b00;font-weight:800; }
+  .bf-ok{ background:var(--gruen-bg);border:1px solid #b7e3c6; } .bf-ok .bf-tag{ color:var(--gruen);font-weight:800; }
+  .rec-slot{ margin-bottom:0.7rem; }
+  .rec-slot-h{ font-weight:800;color:var(--dunkel);font-size:0.85rem;margin:0.3rem 0 0.35rem; }
+  .rec{ background:#f4f9fe;border:1px solid var(--hellblau);border-radius:10px;padding:0.5rem 0.65rem;margin-bottom:0.35rem; }
+  .rec-nm{ font-weight:800;color:var(--royal);font-size:0.92rem; }
+  .rec-why{ font-size:0.78rem;color:#5a6b7a;margin-top:0.12rem; }
+  .a-danger{ background:#FDE7E7;border:1.5px solid #E0A0A0;color:#9b1c1c;border-radius:12px;padding:0.7rem 0.8rem;font-size:0.85rem;font-weight:600;line-height:1.4;margin-bottom:0.8rem; }
+  .a-danger b{ color:#8a1414; }
+  .rec.flag{ border-color:#E0A0A0;background:#FDF3F3; }
+  .rec-warn{ font-size:0.7rem;color:#fff;font-weight:800;background:#c0392b;border-radius:6px;padding:0.05rem 0.4rem;margin-left:0.3rem;white-space:nowrap; }
+  .rec-warn2{ font-size:0.74rem;color:#9b1c1c;margin-top:0.2rem;font-weight:600; }
+  .a-chip.med.sel{ background:#b23030;border-color:#b23030; }
+  .pi-warn{ font-size:0.78rem;color:#b23030;font-weight:700;margin-top:0.35rem;line-height:1.35; }
+  #printArea{ display:none; }
+  @media print {
+    body > *:not(#printArea){ display:none !important; }
+    #printArea{ display:block !important; }
+    @page{ margin:14mm; }
+  }
 </style>
 </head>
 <body>
@@ -166,6 +207,7 @@
   <div class="tabs">
     <div class="tab active" data-mode="heute">Heute</div>
     <div class="tab" data-mode="plan">Plan</div>
+    <div class="tab" data-mode="analyse">Analyse</div>
     <div class="tab" data-mode="verlauf">Verlauf</div>
   </div>
   <div id="content"></div>
@@ -174,6 +216,7 @@
     Technische Umsetzung mit Claude by Anthropic
   </footer>
 </main>
+<div id="printArea"></div>
 
 <script>
 /* ═══ SPEICHER (localStorage mit Fallback) ═══ */
@@ -199,18 +242,48 @@ const SLOT_LABEL = Object.fromEntries(SLOTS.map(s=>[s.id,s.label]));
 
 /* ═══ WECHSELWIRKUNGEN — im selben Zeitfenster zeitlich trennen ═══ */
 const NUT_MATCH = [
-  { key:'eisen',     rx:/eisen|ferro/i },
-  { key:'magnesium', rx:/magnesium/i },
-  { key:'kalzium',   rx:/kalzium|calcium|kalk/i },
-  { key:'zink',      rx:/zink|zinc/i },
-  { key:'kupfer',    rx:/kupfer|copper/i }
+  { key:'eisen',      rx:/eisen|ferro/i },
+  { key:'magnesium',  rx:/magnesium/i },
+  { key:'kalzium',    rx:/kalzium|calcium|kalk/i },
+  { key:'zink',       rx:/zink|zinc/i },
+  { key:'kupfer',     rx:/kupfer|copper/i },
+  { key:'mangan',     rx:/mangan|manganese/i },
+  { key:'molybdaen',  rx:/molybd/i },
+  { key:'chrom',      rx:/chrom/i },
+  { key:'selen',      rx:/selen/i },
+  { key:'c',          rx:/vitamin[\s-]*c\b|ascorbin/i },
+  { key:'e',          rx:/vitamin[\s-]*e\b|tocopherol/i },
+  { key:'k',          rx:/vitamin[\s-]*k\d?\b|\bk2\b|\bmk-?7\b|menachinon|phyllochinon/i },
+  { key:'omega3',     rx:/omega[\s-]*3|fisch[öo]l|algen[öo]l|\bepa\b|\bdha\b/i },
+  { key:'ballast',    rx:/ballast|flohsamen|psyllium|inulin|pektin/i },
+  { key:'arginin',    rx:/arginin/i },
+  { key:'lysin',      rx:/lysin/i },
+  { key:'biotin',     rx:/biotin|vitamin[\s-]*b7|vitamin[\s-]*h\b/i },
+  { key:'alphalipon', rx:/alpha[\s-]*lipon|lipons[äa]ure|thioct/i },
+  { key:'taurin',     rx:/taurin/i },
+  { key:'koffein',    rx:/koffein|caffein|coffein|energy[\s-]*drink/i }
 ];
 const CONFLICTS = {
   'eisen|magnesium':'hemmen sich gegenseitig bei der Aufnahme – mind. 2 Std. Abstand.',
   'eisen|kalzium':  'Kalzium hemmt die Eisenaufnahme stark – mind. 2 Std. Abstand.',
   'eisen|zink':     'konkurrieren um denselben Aufnahmeweg – zeitlich trennen.',
+  'magnesium|zink': 'konkurrieren in hoher Dosis um die Aufnahme – zeitlich trennen.',
   'kalzium|zink':   'Kalzium hemmt die Zinkaufnahme – zeitlich trennen.',
-  'kupfer|zink':    'Zink senkt Kupfer bei Dauereinnahme – zeitlich trennen, Verhältnis beachten.'
+  'kupfer|zink':    'Zink senkt Kupfer bei Dauereinnahme – zeitlich trennen, Verhältnis beachten.',
+  'eisen|mangan':   'hemmen sich bei der Aufnahme – zeitlich trennen.',
+  'kalzium|mangan': 'Kalzium hemmt die Mangan-Aufnahme – zeitlich trennen.',
+  'chrom|kalzium':  'Kalzium hemmt die Chrom-Aufnahme – zeitlich trennen.',
+  'kupfer|molybdaen':'sehr hohes Molybdän senkt Kupfer – Verhältnis beachten, zeitlich trennen.',
+  'ballast|eisen':  'Ballaststoffe binden Eisen – Präparat 1–2 Std. davor/danach.',
+  'ballast|zink':   'Ballaststoffe binden Zink – zeitlich trennen.',
+  'ballast|kalzium':'Ballaststoffe binden Kalzium – zeitlich trennen.',
+  'arginin|lysin':  'Gegenspieler bei der Aufnahme – nicht hochdosiert gemeinsam.',
+  'c|kupfer':       'sehr hohe Vitamin-C-Dosen senken die Kupferaufnahme – etwas versetzt einnehmen.',
+  'c|selen':        'hochdosiertes Vitamin C zeitlich von Selen trennen.',
+  'e|k':            'hohe Vitamin-E-Dosen wirken gegen Vitamin K – zeitlich trennen.',
+  'k|omega3':       'in hoher Dosis auf Blutungsneigung achten (v. a. mit Blutverdünnern).',
+  'alphalipon|biotin':'Alpha-Liponsäure kann die Biotin-Verwertung stören – zeitlich trennen / Biotin ergänzen.',
+  'koffein|taurin': 'zusammen können Herzklopfen und Unruhe fördern.'
 };
 function nutKeysOf(name){ return NUT_MATCH.filter(m=>m.rx.test(name||'')).map(m=>m.key); }
 function conflictNote(k1,k2){ return CONFLICTS[[k1,k2].sort().join('|')] || null; }
@@ -267,6 +340,8 @@ if(!state.seeded){
   state.seeded = true;
   save();
 }
+if(!Array.isArray(state.meds)) state.meds = [];
+if(typeof state.medsFree !== "string") state.medsFree = "";
 
 let mode = 'heute';
 let editing = null;
@@ -312,6 +387,7 @@ function renderHeute(){
     ${done===total ? '<div class="alldone">✓ Alles für heute genommen – stark!</div>' : ''}
   </div>`;
 
+  html += medBanner();
   SLOTS.forEach(sl=>{
     const slotItems = state.plan.filter(p=>p.slots && p.slots.includes(sl.id));
     if(slotItems.length===0) return;
@@ -328,6 +404,7 @@ function renderHeute(){
         <div class="nm">${esc(p.name)}</div>
         <div class="ds">${esc(p.dose||'')}</div>
         ${p.note?`<div class="nt">${esc(p.note)}</div>`:''}
+        ${medItemWarnHtml(p.name)}
       </div>`;
     });
     html += `</div>`;
@@ -352,6 +429,7 @@ function renderHeute(){
 function renderPlan(){
   headTitel.textContent = 'Supplemente · Plan';
   let html = `<p class="plan-intro">Hier verwaltest du, was du nimmst. Tippe auf <b>Bearbeiten</b> oder lege unten ein neues Supplement an.</p>`;
+  html += medBanner();
   allPlanConflicts().forEach(c=>{
     html += `<div class="warn"><span class="wic">⚠️</span><span><b>${esc(c.where)}${esc(c.a)} + ${esc(c.b)}</b><span class="wtx">${esc(c.note)}</span></span></div>`;
   });
@@ -367,13 +445,56 @@ function renderPlan(){
         <div class="pi-dose">${esc(p.dose||'')}</div>
         <div class="pi-slots">${slots||'<span class="pi-slot" style="background:#f0e0e0;color:#b23030">keine Tageszeit</span>'}</div>
         ${p.note?`<div class="pi-note">${esc(p.note)}</div>`:''}
+        ${medItemWarnHtml(p.name)}
         <button class="pi-edit" data-edit="${p.id}">Bearbeiten</button>
       </div>`;
     });
   }
   if(!editing){ html += `<button class="add-btn" id="addBtn">＋ Supplement hinzufügen</button>`; }
+  if(!editing && state.plan.length){ html += `<button class="a-btn2" id="pdfBtn" style="width:100%;margin-top:0.5rem;">📄 Plan als PDF / senden</button>`; }
   content.innerHTML = html;
   bindPlan();
+}
+
+function printPlan(){
+  if(!state.plan.length){ try{ alert("Der Plan ist noch leer – f\u00fcge zuerst Supplemente hinzu."); }catch(e){} return; }
+  let name=""; try{ name=window.prompt("Name des Kunden (optional, leer lassen geht auch):","")||""; }catch(e){}
+  const d=new Date().toLocaleDateString('de-CH',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const med=activeMeds();
+  let h='<div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#1a2b3c;max-width:720px;margin:0 auto;font-size:14px;line-height:1.45;">';
+  h+='<div style="border-bottom:3px solid #1565C0;padding-bottom:10px;margin-bottom:18px;">';
+  h+='<div style="font-size:20px;font-weight:800;color:#1565C0;">Bioenergetische Frequenzarbeit</div>';
+  h+='<div style="font-size:13px;color:#5a6b7c;">Markus Rufer \u00b7 Meiringen</div></div>';
+  h+='<div style="font-size:22px;font-weight:800;margin:0 0 4px;">Supplementierungs-Plan</div>';
+  h+='<div style="font-size:13px;color:#5a6b7c;margin-bottom:16px;">Kunde: '+(name?esc(name):'________________________')+' &nbsp;\u00b7&nbsp; Datum: '+d+'</div>';
+  if(med.length){
+    const block=med.filter(m=>m.sev==="block");
+    h+='<div style="border:1.5px solid '+(block.length?'#E0A0A0':'#e8c886')+';background:'+(block.length?'#FDE7E7':'#FFF7E6')+';color:'+(block.length?'#9b1c1c':'#8a5a00')+';border-radius:8px;padding:8px 10px;font-size:12.5px;margin-bottom:16px;"><b>\u26a0 Hinterlegte Medikamente / Vorerkrankungen:</b> '+med.map(m=>esc(m.label)).join(", ")+'. Die Einnahme der Supplemente bitte mit Arzt/Apotheke abkl\u00e4ren.</div>';
+  }
+  SLOTS.forEach(sl=>{
+    const items=state.plan.filter(pp=>(pp.slots||[]).includes(sl.id));
+    if(!items.length) return;
+    h+='<div style="margin-bottom:14px;"><div style="font-size:15px;font-weight:700;color:#1565C0;border-bottom:1px solid #d7e3f2;padding-bottom:3px;margin-bottom:6px;">'+sl.ic+' '+sl.label+' <span style="font-weight:400;color:#8a98a8;font-size:12px;">('+sl.hint+')</span></div>';
+    items.forEach(pp=>{
+      h+='<div style="margin:0 0 7px;padding-left:4px;"><span style="font-weight:700;">'+esc(pp.name)+'</span>'+(pp.dose?' <span style="color:#3a4b5c;">\u2013 '+esc(pp.dose)+'</span>':'');
+      if(pp.note) h+='<div style="font-size:12px;color:#5a6b7c;">'+esc(pp.note)+'</div>';
+      const w=medWarnForItem(pp.name);
+      if(w) h+='<div style="font-size:12px;color:#b23030;font-weight:600;">\u26a0 mit Arzt/Apotheke abkl\u00e4ren'+(w.labels.length?' ('+w.labels.map(esc).join(", ")+')':'')+'</div>';
+      h+='</div>';
+    });
+    h+='</div>';
+  });
+  const noslot=state.plan.filter(pp=>!(pp.slots||[]).length);
+  if(noslot.length){
+    h+='<div style="margin-bottom:14px;"><div style="font-size:15px;font-weight:700;color:#b23030;border-bottom:1px solid #f0d7d7;padding-bottom:3px;margin-bottom:6px;">Ohne Tageszeit</div>';
+    noslot.forEach(pp=>{ h+='<div style="margin:0 0 6px;padding-left:4px;"><span style="font-weight:700;">'+esc(pp.name)+'</span>'+(pp.dose?' \u2013 '+esc(pp.dose):'')+'</div>'; });
+    h+='</div>';
+  }
+  h+='<div style="margin-top:22px;border-top:1px solid #d7e3f2;padding-top:10px;font-size:11px;color:#8a98a8;line-height:1.5;">';
+  h+='Dieser Plan dient der Orientierung und ersetzt keine \u00e4rztliche Beratung. Bei Medikamenten oder Vorerkrankungen die Einnahme mit Arzt oder Apotheke abkl\u00e4ren.<br>';
+  h+='Idee, Konzept &amp; Architektur: Markus Rufer \u00b7 Technische Umsetzung mit Claude by Anthropic</div></div>';
+  const pa=document.getElementById("printArea"); if(pa){ pa.innerHTML=h; }
+  setTimeout(()=>{ try{ window.print(); }catch(e){} }, 60);
 }
 
 function planForm(){
@@ -396,6 +517,8 @@ function planForm(){
 function bindPlan(){
   const addBtn = document.getElementById('addBtn');
   if(addBtn) addBtn.onclick = ()=>{ editing='new'; formSlots=[]; renderPlan(); window.scrollTo({top:0,behavior:'smooth'}); };
+  const pdfBtn = document.getElementById('pdfBtn');
+  if(pdfBtn) pdfBtn.onclick = printPlan;
 
   content.querySelectorAll('[data-edit]').forEach(b=>{
     b.onclick = ()=>{ editing=b.dataset.edit; const p=state.plan.find(x=>x.id===editing); formSlots=[...(p.slots||[])]; renderPlan(); window.scrollTo({top:0,behavior:'smooth'}); };
@@ -463,10 +586,376 @@ function renderVerlauf(){
   content.innerHTML = html;
 }
 
+
+/* ═══ ANALYSE — Beschwerden + Blutwerte → Plan (offline, regelbasiert) ═══ */
+const A_W = { sehrhoch:4, hoch:3, mittel:2, niedrig:1 };
+
+const CAT = {
+  eisen:     { name:"Eisen",                 slot:"morgen", alt:["mittag"],          ck:"eisen",     note:"nüchtern mit Vitamin C, weg von Kaffee/Milch" },
+  magnesium: { name:"Magnesium",             slot:"abend",  alt:["nacht","mittag"],  ck:"magnesium", note:"entspannend, abends/nachts" },
+  d:         { name:"Vitamin D3",            slot:"mittag", alt:["morgen"],          ck:null,        note:"zur Mahlzeit mit Fett" },
+  k2:        { name:"Vitamin K2",            slot:"mittag", alt:["morgen"],          ck:"k",         note:"zusammen mit Vitamin D3" },
+  c:         { name:"Vitamin C",             slot:"morgen", alt:["mittag"],          ck:"c",         note:"gut mit Eisen" },
+  zink:      { name:"Zink",                  slot:"abend",  alt:["nacht"],           ck:"zink",      note:"nüchtern/zum Essen, getrennt von Eisen & Kalzium" },
+  kupfer:    { name:"Kupfer",                slot:"morgen", alt:["mittag"],          ck:"kupfer",    note:"getrennt von Zink" },
+  kalzium:   { name:"Kalzium",              slot:"abend",  alt:["mittag"],          ck:"kalzium",   note:"getrennt von Eisen & Zink" },
+  kalium:    { name:"Kalium",               slot:"mittag", alt:["morgen"],          ck:null,        note:"am besten über Lebensmittel" },
+  omega3:    { name:"Omega-3",              slot:"mittag", alt:["abend"],           ck:"omega3",    note:"zur Mahlzeit mit Fett" },
+  selen:     { name:"Selen",               slot:"morgen", alt:["mittag"],          ck:"selen",     note:"gut mit Vitamin E" },
+  jod:       { name:"Jod",                 slot:"morgen", alt:["mittag"],          ck:null,        note:"zusammen mit Selen" },
+  b12:       { name:"Vitamin B12",         slot:"morgen", alt:["mittag"],          ck:null,        note:"aktivierend, morgens" },
+  folsaeure: { name:"Folsäure",            slot:"morgen", alt:["mittag"],          ck:null,        note:"mit B12 und B6" },
+  b6:        { name:"Vitamin B6",          slot:"morgen", alt:["mittag"],          ck:null,        note:"morgens, nicht spät" },
+  b2:        { name:"Vitamin B2",          slot:"morgen", alt:["mittag"],          ck:null,        note:"morgens" },
+  q10:       { name:"Coenzym Q10",         slot:"morgen", alt:["mittag"],          ck:null,        note:"energetisierend, nicht abends" },
+  carnitin:  { name:"L-Carnitin",          slot:"morgen", alt:["mittag"],          ck:null,        note:"tagsüber zur Mahlzeit" },
+  chrom:     { name:"Chrom",               slot:"mittag", alt:["morgen"],          ck:"chrom",     note:"zur Mahlzeit" },
+  protein:   { name:"Eiweiss / Protein",   slot:"mittag", alt:["morgen","abend"],  ck:null,        note:"über den Tag verteilt" },
+  e:         { name:"Vitamin E",           slot:"mittag", alt:["abend"],           ck:"e",         note:"zur Mahlzeit, getrennt von Vitamin K" },
+  tryptophan:{ name:"L-Tryptophan",        slot:"nacht",  alt:["abend"],           ck:null,        note:"abends mit etwas Kohlenhydraten" },
+  glycin:    { name:"Glycin",              slot:"nacht",  alt:["abend"],           ck:null,        note:"vor dem Schlafen" },
+  theanin:   { name:"L-Theanin",           slot:"abend",  alt:["nacht","mittag"],  ck:null,        note:"beruhigt, dämpft Koffein" },
+  tyrosin:   { name:"L-Tyrosin",           slot:"morgen", alt:["mittag"],          ck:null,        note:"morgens nüchtern für Antrieb" },
+  arginin:   { name:"L-Arginin",           slot:"abend",  alt:["morgen"],          ck:"arginin",   note:"nüchtern; getrennt von Lysin" },
+  lysin:     { name:"L-Lysin",             slot:"morgen", alt:["abend"],           ck:"lysin",     note:"getrennt von Arginin" },
+  biotin:    { name:"Biotin",              slot:"morgen", alt:["mittag"],          ck:"biotin",    note:"morgens" },
+  silizium:  { name:"Silizium (Kieselsäure)", slot:"morgen", alt:["mittag"],       ck:null,        note:"mit viel Wasser" },
+  kollagen:  { name:"Kollagen",            slot:"morgen", alt:["mittag"],          ck:null,        note:"mit Vitamin C" },
+  msm:       { name:"MSM",                 slot:"mittag", alt:["morgen"],          ck:null,        note:"mit reichlich Flüssigkeit" },
+  curcumin:  { name:"Curcumin (Kurkuma)",  slot:"mittag", alt:["abend"],           ck:null,        note:"mit Fett + schwarzem Pfeffer" },
+  probiotika:{ name:"Probiotika",          slot:"abend",  alt:["morgen"],          ck:null,        note:"mit Abstand zu Antibiotika" },
+  ballast:   { name:"Ballaststoffe",       slot:"abend",  alt:["mittag","morgen"], ck:"ballast",   note:"viel trinken; weg von Mineralstoffen" },
+  lutein:    { name:"Lutein & Zeaxanthin", slot:"mittag", alt:["abend"],           ck:null,        note:"zur Mahlzeit mit Fett" },
+  alphalipon:{ name:"Alpha-Liponsäure",    slot:"morgen", alt:["mittag"],          ck:"alphalipon",note:"nüchtern; getrennt von Biotin" }
+};
+
+const SYMPTOMS_A = [
+  { name:"Müdigkeit / Erschöpfung", def:[{n:"eisen",s:"hoch"},{n:"b12",s:"hoch"},{n:"d",s:"mittel"},{n:"folsaeure",s:"mittel"},{n:"magnesium",s:"mittel"},{n:"q10",s:"mittel"},{n:"carnitin",s:"mittel"}] },
+  { name:"Restless Legs", def:[{n:"eisen",s:"sehrhoch"},{n:"magnesium",s:"hoch"},{n:"folsaeure",s:"mittel"},{n:"d",s:"mittel"},{n:"b12",s:"mittel"}] },
+  { name:"Muskelkrämpfe", def:[{n:"magnesium",s:"hoch"},{n:"kalium",s:"hoch"},{n:"kalzium",s:"mittel"},{n:"d",s:"niedrig"}] },
+  { name:"Haarausfall", def:[{n:"eisen",s:"hoch"},{n:"zink",s:"hoch"},{n:"d",s:"mittel"},{n:"biotin",s:"mittel"},{n:"protein",s:"mittel"}] },
+  { name:"Brüchige Nägel", def:[{n:"biotin",s:"hoch"},{n:"eisen",s:"mittel"},{n:"zink",s:"mittel"},{n:"silizium",s:"mittel"}] },
+  { name:"Konzentration / Brain Fog", def:[{n:"eisen",s:"hoch"},{n:"b12",s:"hoch"},{n:"omega3",s:"mittel"},{n:"d",s:"mittel"},{n:"tyrosin",s:"mittel"}] },
+  { name:"Stimmungstief / Antriebslos", def:[{n:"d",s:"hoch"},{n:"b12",s:"hoch"},{n:"folsaeure",s:"hoch"},{n:"omega3",s:"mittel"},{n:"magnesium",s:"mittel"},{n:"tryptophan",s:"mittel"}] },
+  { name:"Schlafstörungen", def:[{n:"magnesium",s:"hoch"},{n:"tryptophan",s:"mittel"},{n:"glycin",s:"mittel"},{n:"d",s:"mittel"},{n:"theanin",s:"niedrig"}] },
+  { name:"Innere Unruhe / Stress / Angst", def:[{n:"magnesium",s:"hoch"},{n:"omega3",s:"mittel"},{n:"theanin",s:"mittel"},{n:"b6",s:"mittel"},{n:"d",s:"mittel"}] },
+  { name:"Kribbeln / Taubheit", def:[{n:"b12",s:"sehrhoch"},{n:"b6",s:"mittel"},{n:"magnesium",s:"mittel"},{n:"kalzium",s:"mittel"}] },
+  { name:"Häufige Infekte / Immunschwäche", def:[{n:"d",s:"hoch"},{n:"zink",s:"hoch"},{n:"c",s:"hoch"},{n:"selen",s:"mittel"},{n:"eisen",s:"mittel"}] },
+  { name:"Migräne / Kopfschmerzen", def:[{n:"magnesium",s:"hoch"},{n:"b2",s:"hoch"},{n:"q10",s:"mittel"},{n:"d",s:"mittel"}] },
+  { name:"Gelenkschmerzen", def:[{n:"omega3",s:"hoch"},{n:"d",s:"hoch"},{n:"curcumin",s:"mittel"},{n:"msm",s:"mittel"},{n:"kollagen",s:"mittel"}] },
+  { name:"Heisshunger / Blutzucker", def:[{n:"chrom",s:"hoch"},{n:"magnesium",s:"mittel"},{n:"protein",s:"mittel"},{n:"zink",s:"mittel"}] },
+  { name:"Muskelaufbau / Sport", def:[{n:"protein",s:"hoch"},{n:"magnesium",s:"mittel"},{n:"carnitin",s:"mittel"},{n:"b6",s:"mittel"}] },
+  { name:"Schlechte Wundheilung", def:[{n:"zink",s:"sehrhoch"},{n:"c",s:"hoch"},{n:"protein",s:"hoch"},{n:"kupfer",s:"mittel"},{n:"kollagen",s:"mittel"}] },
+  { name:"Bindegewebe / Haut / Falten", def:[{n:"c",s:"hoch"},{n:"silizium",s:"hoch"},{n:"kollagen",s:"mittel"},{n:"omega3",s:"mittel"},{n:"zink",s:"niedrig"}] },
+  { name:"Sehkraft / Augen", def:[{n:"lutein",s:"hoch"},{n:"omega3",s:"mittel"},{n:"zink",s:"mittel"},{n:"c",s:"niedrig"},{n:"e",s:"niedrig"}] },
+  { name:"Durchblutung / kalte Hände/Füsse", def:[{n:"arginin",s:"hoch"},{n:"d",s:"mittel"},{n:"zink",s:"mittel"},{n:"omega3",s:"mittel"}] },
+  { name:"Verdauung / Darm / Blähungen", def:[{n:"probiotika",s:"hoch"},{n:"ballast",s:"hoch"},{n:"magnesium",s:"mittel"}] },
+  { name:"Zahnfleischbluten", def:[{n:"c",s:"sehrhoch"}] },
+  { name:"Schilddrüse / Frieren / träge", def:[{n:"jod",s:"hoch"},{n:"selen",s:"hoch"},{n:"tyrosin",s:"mittel"}] },
+  { name:"Knochen / Osteoporose", def:[{n:"d",s:"hoch"},{n:"kalzium",s:"hoch"},{n:"k2",s:"mittel"},{n:"magnesium",s:"mittel"},{n:"protein",s:"niedrig"}] }
+];
+
+/* Blutwerte: Schweizer SI-Einheiten + Muster zum Auslesen aus dem Laborbericht. */
+const BLOOD_TESTS = [
+  { key:"ferritin", label:"Ferritin",            unit:"µg/l",   low:30,   high:300, nut:"eisen",     rx:[/ferritin[\s\S]{0,25}?(\d+(?:[.,]\d+)?)\s*(?:[µμu]g|ng|mcg)/i, /ferritin[\s\S]{0,20}?(\d+(?:[.,]\d+)?)/i] },
+  { key:"vitd",     label:"Vitamin D (25-OH)",   unit:"nmol/l", low:75,   high:250, nut:"d",         rx:[/25[\s-]?oh[\s\S]{0,30}?(\d+(?:[.,]\d+)?)\s*(?:nmol|ng)/i, /vitamin[\s-]*d[\s-]*3?\b[\s\S]{0,30}?(\d+(?:[.,]\d+)?)\s*(?:nmol|ng)/i, /calcidiol[\s\S]{0,25}?(\d+(?:[.,]\d+)?)\s*(?:nmol|ng)/i] },
+  { key:"holotc",   label:"Vitamin B12 (Holo-TC)",unit:"pmol/l",low:35,   high:null,nut:"b12",       rx:[/holo[\s-]?(?:tc|transcobalamin)[\s\S]{0,25}?(\d+(?:[.,]\d+)?)\s*pmol/i, /holo[\s-]?(?:tc|transcobalamin)[\s\S]{0,20}?(\d+(?:[.,]\d+)?)/i, /aktives?\s*b\s*-?\s*12[\s\S]{0,20}?(\d+(?:[.,]\d+)?)/i] },
+  { key:"folat",    label:"Folsäure (Folat)",    unit:"nmol/l", low:10,   high:null,nut:"folsaeure", rx:[/fol(?:s(?:ae|[aä])ure|at)[\s\S]{0,25}?(\d+(?:[.,]\d+)?)\s*(?:nmol|ng)/i, /fol(?:s(?:ae|[aä])ure|at)[\s\S]{0,20}?(\d+(?:[.,]\d+)?)/i] },
+  { key:"mg",       label:"Magnesium (Serum)",   unit:"mmol/l", low:0.75, high:1.05,nut:"magnesium", rx:[/magnesium[\s\S]{0,25}?(\d+(?:[.,]\d+)?)\s*mmol/i, /magnesium[\s\S]{0,20}?(\d+(?:[.,]\d+)?)/i] },
+  { key:"zink",     label:"Zink",                unit:"µmol/l", low:11,   high:18,  nut:"zink",      rx:[/zink[\s\S]{0,25}?(\d+(?:[.,]\d+)?)\s*(?:[µμu]mol)/i, /zink[\s\S]{0,20}?(\d+(?:[.,]\d+)?)/i] },
+  { key:"selen",    label:"Selen",               unit:"µg/l",   low:80,   high:140, nut:"selen",     rx:[/selen[\s\S]{0,25}?(\d+(?:[.,]\d+)?)\s*(?:[µμu]g|nmol)/i, /selen[\s\S]{0,20}?(\d+(?:[.,]\d+)?)/i] },
+  { key:"kalium",   label:"Kalium",              unit:"mmol/l", low:3.6,  high:5.2, nut:"kalium",    rx:[/kalium[\s\S]{0,25}?(\d+(?:[.,]\d+)?)\s*mmol/i, /kalium[\s\S]{0,20}?(\d+(?:[.,]\d+)?)/i] }
+];
+
+const MED_CATS = [
+  { label:"Immunsuppressiva / Transplantat", sev:"block", affects:["probiotika","c","e","curcumin","alphalipon"], note:"Supplemente und Kräuter können den Wirkspiegel der Immunsuppressiva verändern; Probiotika sind bei Immunsuppression riskant." },
+  { label:"Clozapin / Antipsychotika", sev:"block", affects:["taurin"], note:"Enges Sicherheitsfenster, Blutbild-Monitoring, starke Verstopfungsneigung, Koffein-Interaktion." },
+  { label:"Lithium", sev:"block", affects:[], note:"Sehr enges Fenster; Salz- und Flüssigkeitshaushalt verändern den Spiegel." },
+  { label:"Niereninsuffizienz", sev:"block", affects:["kalium","magnesium"], note:"Kalium und Magnesium können bei Nierenschwäche gefährlich ansteigen." },
+  { label:"Blutverdünner (Marcoumar/DOAK)", sev:"caution", affects:["omega3","k2","e","curcumin"], note:"Können die Blutgerinnung beeinflussen; Vitamin K wirkt gegen Marcoumar." },
+  { label:"Schilddrüsenhormon (L-Thyroxin)", sev:"caution", affects:["kalzium","eisen","magnesium"], note:"Kalzium, Eisen und Magnesium hemmen die Aufnahme – mind. 4 Std. Abstand." },
+  { label:"Antidepressiva (SSRI/MAO)", sev:"caution", affects:["tryptophan","tyrosin"], note:"L-Tryptophan und L-Tyrosin können gefährlich interagieren (Serotonin/Blutdruck)." },
+  { label:"Diabetes-Medikamente", sev:"caution", affects:["chrom","alphalipon"], note:"Chrom und Alpha-Liponsäure können den Blutzucker zusätzlich senken." },
+  { label:"Antibiotika (aktuell)", sev:"caution", affects:["probiotika","eisen","zink","kalzium","magnesium"], note:"Mineralstoffe binden manche Antibiotika; Probiotika mit Abstand einnehmen." },
+  { label:"Schwangerschaft / Stillzeit", sev:"caution", affects:[], note:"Hohe Dosen (v. a. Vitamin A) meiden; Ergänzungen ärztlich begleiten." }
+];
+function aMedEval(){
+  const active=[...aMed].map(i=>MED_CATS[i]);
+  const block=active.filter(m=>m.sev==="block");
+  const caution=active.filter(m=>m.sev==="caution");
+  const affected={};
+  active.forEach(m=> (m.affects||[]).forEach(k=>{ (affected[k]=affected[k]||[]).push(m.label); }));
+  return {active, block, caution, affected, free:aMedFree};
+}
+const MED_NAME_MATCH = [
+  { key:"eisen", rx:/eisen|ferro|ferrit/i },
+  { key:"magnesium", rx:/magnesium/i },
+  { key:"kalzium", rx:/kalzium|calcium|kalk/i },
+  { key:"kalium", rx:/kalium/i },
+  { key:"zink", rx:/zink|zinc/i },
+  { key:"chrom", rx:/chrom/i },
+  { key:"c", rx:/vitamin\s*c\b|ascorbin/i },
+  { key:"e", rx:/vitamin\s*e\b|tocopherol/i },
+  { key:"k2", rx:/vitamin\s*k|menachinon|mk-?7/i },
+  { key:"omega3", rx:/omega\s*-?\s*3|fisch[\u00f6o]l|epa\b|dha\b/i },
+  { key:"probiotika", rx:/probiotik|laktobazill|lactobac|bifido|darmbakterien|darmflora/i },
+  { key:"curcumin", rx:/curcumin|kurkuma/i },
+  { key:"alphalipon", rx:/alpha.?lipon|lipons[\u00e4a]ure/i },
+  { key:"taurin", rx:/taurin/i },
+  { key:"tryptophan", rx:/tryptophan|5-?htp/i },
+  { key:"tyrosin", rx:/tyrosin/i }
+];
+function activeMeds(){ return (state.meds||[]).map(i=>MED_CATS[i]).filter(Boolean); }
+function nameToMedKeys(name){ return MED_NAME_MATCH.filter(m=>m.rx.test(name||"")).map(m=>m.key); }
+function medWarnForItem(name){
+  const meds=activeMeds(); if(!meds.length) return null;
+  const keys=nameToMedKeys(name); const hits=[]; let block=false;
+  meds.forEach(m=>{ if(m.sev==="block"){ hits.push(m.label); block=true; } else if((m.affects||[]).some(k=>keys.indexOf(k)>=0)){ hits.push(m.label); } });
+  return hits.length? { block:block, labels:[...new Set(hits)] } : null;
+}
+function medItemWarnHtml(name){
+  const w=medWarnForItem(name); if(!w) return "";
+  return '<div class="pi-warn">\u26a0 mit Arzt/Apotheke abkl\u00e4ren'+(w.labels.length?" ("+w.labels.map(esc).join(", ")+")":"")+'</div>';
+}
+function medBanner(){
+  const meds=activeMeds(); if(!meds.length) return "";
+  const block=meds.filter(m=>m.sev==="block");
+  if(block.length){ return '<div class="a-danger"><b>\u26a0 Achtung \u2013 Medikamente hinterlegt</b><br>Wegen: '+block.map(m=>esc(m.label)).join(", ")+'. Jede Erg\u00e4nzung individuell mit dem Behandlungsteam abkl\u00e4ren \u2013 die App ersetzt das nicht.</div>'; }
+  return '<div class="warn"><span class="wic">\u26a0\ufe0f</span><span><b>Medikamente hinterlegt</b><span class="wtx">'+meds.map(m=>esc(m.label)).join(", ")+' \u2013 markierte Supplemente mit Arzt/Apotheke abkl\u00e4ren.</span></span></div>';
+}
+let aSel = new Set();
+let aBlood = {};
+let aMed = new Set();
+let aMedFree = "";
+
+function aSchedule(keys){
+  const place = {};
+  keys.forEach(k=> place[k] = CAT[k].slot);
+  for(let pass=0; pass<4; pass++){
+    let moved=false;
+    for(let i=0;i<keys.length;i++){ for(let j=i+1;j<keys.length;j++){
+      const a=keys[i], b=keys[j], ca=CAT[a].ck, cb=CAT[b].ck;
+      if(ca && cb && place[a]===place[b] && conflictNote(ca,cb)){
+        const mv=b;
+        const tries=[CAT[mv].slot].concat(CAT[mv].alt||[]).concat(SLOTS.map(x=>x.id));
+        for(const sl of tries){
+          if(sl===place[a]) continue;
+          let ok=true;
+          for(const k2 of keys){ if(k2===mv) continue;
+            if(place[k2]===sl && CAT[k2].ck && CAT[mv].ck && conflictNote(CAT[k2].ck,CAT[mv].ck)){ ok=false; break; } }
+          if(ok){ place[mv]=sl; moved=true; break; }
+        }
+      }
+    }}
+    if(!moved) break;
+  }
+  return place;
+}
+
+function aScore(){
+  const score={}, reason={}, suppress={};
+  const add=(k,w,why)=>{ if(suppress[k]) return; score[k]=(score[k]||0)+w; (reason[k]=reason[k]||[]).push(why); };
+  aSel.forEach(i=>{ const sy=SYMPTOMS_A[i]; sy.def.forEach(d=> add(d.n, A_W[d.s], sy.name)); });
+  const blood=[];
+  BLOOD_TESTS.forEach(b=>{
+    const raw=aBlood[b.key]; if(raw==null || raw==="") return;
+    const v=parseFloat(String(raw).replace(",",".")); if(isNaN(v)) return;
+    let st="ok";
+    if(v < b.low) st="tief";
+    else if(b.high!=null && v > b.high) st="hoch";
+    blood.push({label:b.label, unit:b.unit, val:v, status:st});
+    if(st==="tief"){ add(b.nut, 5, "Blutwert "+b.label+" tief"); }
+    if(st==="hoch"){ suppress[b.nut]=true; delete score[b.nut]; }
+  });
+  let keys=Object.keys(score).filter(k=>!suppress[k] && score[k]>=2);
+  keys.sort((a,b)=> score[b]-score[a] || CAT[a].name.localeCompare(CAT[b].name,"de"));
+  keys=keys.slice(0,14);
+  const place=aSchedule(keys);
+  const confl=[];
+  for(let i=0;i<keys.length;i++){ for(let j=i+1;j<keys.length;j++){
+    const a=keys[i], b=keys[j], ca=CAT[a].ck, cb=CAT[b].ck;
+    if(ca && cb && place[a]===place[b]){ const n=conflictNote(ca,cb); if(n) confl.push({a:CAT[a].name,b:CAT[b].name,slot:place[a],note:n}); }
+  }}
+  const recs=keys.map(k=>({key:k, name:CAT[k].name, slot:place[k], score:score[k], reason:(reason[k]||[]), note:CAT[k].note}));
+  return {recs, blood, confl};
+}
+
+function aParseReport(text){
+  let found=0;
+  BLOOD_TESTS.forEach(b=>{
+    for(const rx of b.rx){ const m=text.match(rx); if(m && m[1]){ aBlood[b.key]=m[1].replace(",","."); const el=document.getElementById("bl_"+b.key); if(el) el.value=aBlood[b.key]; found++; break; } }
+  });
+  return found;
+}
+
+/* PDF-Import: pdf.js (v3 UMD) bei Bedarf vom CDN nachladen und Textebene auslesen. */
+let _pdfLib = null;
+function loadPdfLib(){
+  if(window.pdfjsLib){ return Promise.resolve(window.pdfjsLib); }
+  if(_pdfLib){ return _pdfLib; }
+  _pdfLib = new Promise((res,rej)=>{
+    const sc=document.createElement("script");
+    sc.src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+    sc.onload=()=>{ try{ window.pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"; res(window.pdfjsLib); }catch(e){ rej(e); } };
+    sc.onerror=()=>rej(new Error("pdf.js konnte nicht geladen werden"));
+    document.head.appendChild(sc);
+  });
+  return _pdfLib;
+}
+function aInfo(html, kind){
+  const bg=kind==="ok"?"#E6F6EC":(kind==="warn"?"#FFF1D6":"#eef6fd");
+  const bd=kind==="ok"?"#b7e3c6":(kind==="warn"?"#e8c886":"#bcdcf6");
+  const tx=kind==="ok"?"#256b3b":(kind==="warn"?"#a86b00":"#1565C0");
+  const box=document.getElementById("aResult");
+  if(box) box.innerHTML='<div class="a-note" style="background:'+bg+';border-color:'+bd+';color:'+tx+'">'+html+'</div>';
+}
+async function aImportPdf(file){
+  aInfo("📑 PDF wird gelesen …");
+  try{
+    const lib=await loadPdfLib();
+    const buf=await file.arrayBuffer();
+    const pdf=await lib.getDocument({data:buf}).promise;
+    let text="";
+    for(let i=1;i<=pdf.numPages;i++){ const pg=await pdf.getPage(i); const tc=await pg.getTextContent(); text+=tc.items.map(it=>it.str).join(" ")+"\n"; }
+    if(text.replace(/\s/g,"").length<10){
+      aInfo("Im PDF wurde kein Text gefunden – das ist vermutlich ein Scan oder Foto. Schick es mir bitte direkt im Chat, dann lese ich die Werte für dich raus.","warn");
+      return;
+    }
+    const pasteEl=document.getElementById("aPaste"); if(pasteEl) pasteEl.value=text;
+    const n=aParseReport(text);
+    if(n){ aInfo("✓ "+n+" Wert"+(n>1?"e":"")+" aus dem PDF gelesen und unten eingetragen – bitte kurz prüfen, dann „Analysieren“.","ok"); }
+    else { aInfo("PDF gelesen, aber keine Standardwerte erkannt. Der Text steht oben im Feld – prüf ihn von Hand oder schick mir das PDF im Chat.","warn"); }
+  }catch(e){
+    aInfo("PDF konnte nicht gelesen werden (evtl. offline oder ein reiner Scan). Schick es mir im Chat, dann lese ich die Werte raus.","warn");
+  }
+}
+
+function renderAnalyse(){
+  headTitel.textContent = "Supplemente · Analyse";
+  aMed = new Set(state.meds||[]); aMedFree = state.medsFree||"";
+  let h = '<div class="a-note">⚕️ Diese Auswertung ist eine Orientierungshilfe und ersetzt keine ärztliche Abklärung. Blutwerte und ihre Deutung gehören in fachliche Hände.</div>';
+  h += '<div class="a-sec"><div class="a-h">1 · Beschwerden – tippe an, was zutrifft</div><div class="a-chips">';
+  SYMPTOMS_A.forEach((sy,i)=>{ h += '<span class="a-chip'+(aSel.has(i)?' sel':'')+'" data-sym="'+i+'">'+esc(sy.name)+'</span>'; });
+  h += '</div></div>';
+  h += '<div class="a-sec"><div class="a-h">2 · Blutbild</div>';
+  h += '<div class="a-sub">Laborbericht hier einfügen (Text aus dem PDF kopieren) – ich lese die Werte automatisch aus. Du kannst sie danach von Hand korrigieren.</div>';
+  h += '<textarea class="bl-paste" id="aPaste" rows="4" placeholder="z. B. Ferritin 23 µg/l (30–300)\nVitamin D 48 nmol/l\nZink 9.5 µmol/l ..."></textarea>';
+  h += '<label class="a-btn2 file" id="aPdfBtn" style="width:100%;margin:0 0 0.45rem;"><input type="file" id="aPdf" accept="application/pdf,.pdf" hidden>📑 PDF importieren</label>';
+  h += '<div class="a-btn-row"><button class="a-btn2" id="aParse">⤵ Text auslesen</button><label class="a-btn2 file"><input type="file" id="aFile" accept=".txt,.csv,text/plain" hidden>📄 Textdatei</label></div>';
+  h += '<div class="blood-grid">';
+  BLOOD_TESTS.forEach(b=>{
+    const val = (aBlood[b.key]!=null ? aBlood[b.key] : "");
+    h += '<div class="bl-row"><span class="bl-lab">'+esc(b.label)+'</span><input class="bl-in" id="bl_'+b.key+'" inputmode="decimal" placeholder="–" value="'+esc(String(val))+'"><span class="bl-un">'+esc(b.unit)+'</span></div>';
+  });
+  h += '</div><div class="bl-hint">📑 Text-PDF wird automatisch ausgelesen (Internet nötig). Ein Foto oder eingescanntes PDF ohne Textebene kann die App nicht lesen – das schickst du mir am besten direkt im Chat, dann nenne ich dir die Werte zum Eintragen. Vitamin D in nmol/l (ng/ml × 2,5 = nmol/l).</div></div>';
+  h += '<div class="a-sec"><div class="a-h">3 · Medikamente / Vorerkrankungen</div>';
+  h += '<div class="a-sub">Wichtig für die Sicherheit. Bei Medikamenten prüft die App auf bekannte Wechselwirkungen und warnt – bei Hochrisiko (z. B. Transplantat, Clozapin) füllt sie bewusst keinen Plan automatisch. Ersetzt keine Abklärung durch Arzt/Apotheke.</div>';
+  h += '<div class="a-chips">';
+  MED_CATS.forEach((m,i)=>{ h += '<span class="a-chip med'+(aMed.has(i)?" sel":"")+'" data-med="'+i+'">'+esc(m.label)+'</span>'; });
+  h += '</div>';
+  h += '<input class="bl-paste" id="aMedFree" style="margin-top:0.5rem;" placeholder="weitere Medikamente (Freitext, optional)" value="'+esc(aMedFree)+'">';
+  h += '</div>';
+  h += '<button class="add-btn" id="aRun">🔍 Analysieren</button>';
+  h += '<div id="aResult"></div>';
+  content.innerHTML = h;
+  content.querySelectorAll(".a-chip[data-sym]").forEach(c=>{ c.onclick=()=>{ const i=+c.dataset.sym; if(aSel.has(i)){ aSel.delete(i); c.classList.remove("sel"); } else { aSel.add(i); c.classList.add("sel"); } }; });
+  content.querySelectorAll(".a-chip[data-med]").forEach(c=>{ c.onclick=()=>{ const i=+c.dataset.med; if(aMed.has(i)){ aMed.delete(i); c.classList.remove("sel"); } else { aMed.add(i); c.classList.add("sel"); } state.meds=[...aMed]; save(); }; });
+  document.getElementById("aParse").onclick = ()=>{
+    const txt=document.getElementById("aPaste").value||""; const n=aParseReport(txt);
+    const box=document.getElementById("aResult");
+    box.innerHTML = '<div class="a-note" style="background:'+(n?'#E6F6EC':'#FFF1D6')+';border-color:'+(n?'#b7e3c6':'#e8c886')+';color:'+(n?'#256b3b':'#a86b00')+'">'+(n? '✓ '+n+' Wert'+(n>1?'e':'')+' erkannt und unten eingetragen – bitte kurz prüfen.' : 'Keine Werte erkannt. Trag sie bitte unten von Hand ein oder schick mir das Blutbild im Chat.')+'</div>';
+  };
+  document.getElementById("aFile").onchange = (e)=>{
+    const f=e.target.files && e.target.files[0]; if(!f) return;
+    const r=new FileReader(); r.onload=()=>{ document.getElementById("aPaste").value=String(r.result||""); }; r.readAsText(f);
+  };
+  document.getElementById("aPdf").onchange = (e)=>{ const f=e.target.files && e.target.files[0]; if(f) aImportPdf(f); e.target.value=""; };
+  document.getElementById("aRun").onclick = aRunAnalysis;
+}
+
+function aRunAnalysis(){
+  BLOOD_TESTS.forEach(b=>{ const el=document.getElementById("bl_"+b.key); if(el){ const v=el.value.trim(); aBlood[b.key]= (v===""?null:v); } });
+  const mf=document.getElementById("aMedFree"); if(mf) aMedFree=mf.value.trim();
+  state.meds=[...aMed]; state.medsFree=aMedFree; save();
+  const res = aScore();
+  const med = aMedEval();
+  let h="";
+  if(med.block.length){
+    h += '<div class="a-danger"><b>⚠ Stopp – kein automatischer Plan</b><br>Wegen: '+med.block.map(m=>esc(m.label)).join(", ")+'. '+med.block.map(m=>esc(m.note)).join(" ")+' Jede Ergänzung individuell mit dem Behandlungsteam abklären – die App füllt hier bewusst nichts automatisch.</div>';
+  }
+  if(med.caution.length){
+    h += '<div class="warn"><span class="wic">⚠️</span><span><b>Wechselwirkungen mit Medikamenten beachten</b><span class="wtx">'+med.caution.map(m=>esc(m.label)+": "+esc(m.note)).join("  ")+'</span></span></div>';
+  }
+  if(res.blood.length){
+    h += '<div class="a-sec"><div class="a-h">Blutwerte</div>';
+    res.blood.forEach(b=>{ const cls=b.status==="tief"?"bf-low":(b.status==="hoch"?"bf-high":"bf-ok"); const tag=b.status==="tief"?"tief":(b.status==="hoch"?"hoch":"im Zielbereich");
+      h += '<div class="bf '+cls+'"><span>'+esc(b.label)+': <b>'+b.val+" "+esc(b.unit)+'</b></span><span class="bf-tag">'+tag+'</span></div>'; });
+    h += '</div>';
+  }
+  if(!res.recs.length){
+    h += '<div class="empty"><div class="big">🤔</div><p>Noch keine klare Empfehlung – wähle ein paar Beschwerden oder trage Blutwerte ein.</p></div>';
+    document.getElementById("aResult").innerHTML=h; return;
+  }
+  h += '<div class="a-sec"><div class="a-h">Empfehlung & Zeitplan</div>';
+  SLOTS.forEach(sl=>{ const inSlot=res.recs.filter(r=>r.slot===sl.id); if(!inSlot.length) return;
+    h += '<div class="rec-slot"><div class="rec-slot-h">'+sl.ic+" "+sl.label+'</div>';
+    inSlot.forEach(r=>{ const why=(r.note? r.note+" · ":"")+"wegen: "+r.reason.slice(0,3).join(", ");
+      const aff=med.affected[r.key]; const flagged = med.block.length>0 || aff;
+      h += '<div class="rec'+(flagged?" flag":"")+'"><div class="rec-nm">'+esc(r.name)+(flagged?' <span class="rec-warn">⚠ abklären</span>':"")+'</div><div class="rec-why">'+esc(why)+'</div>'+(aff?'<div class="rec-warn2">⚠ Wechselwirkung: '+esc(aff.join("; "))+'</div>':"")+'</div>'; });
+    h += '</div>'; });
+  h += '</div>';
+  if(res.confl.length){ res.confl.forEach(c=>{ h += '<div class="warn"><span class="wic">⚠️</span><span><b>'+esc(c.a)+" + "+esc(c.b)+" ("+esc(SLOT_LABEL[c.slot])+')</b><span class="wtx">'+esc(c.note)+' Wenn möglich auf verschiedene Zeiten legen.</span></span></div>'; }); }
+  if(!med.block.length){ h += '<button class="add-btn" id="aApply">✓ In den Plan übernehmen</button>'; }
+  else { h += '<div class="a-danger">Kein automatisches Befüllen bei diesen Medikamenten/Erkrankungen. Schick die Zusammenfassung unten ans Behandlungsteam.</div>'; }
+  h += '<div class="a-btn-row"><button class="a-btn2" id="aCopy">📋 Zusammenfassung kopieren (Claude / Behandlungsteam)</button></div>';
+  const box=document.getElementById("aResult"); box.innerHTML=h;
+  const ab=document.getElementById("aApply"); if(ab) ab.onclick = ()=> aApply(res.recs, med.affected);
+  document.getElementById("aCopy").onclick = ()=> aCopySummary(res, med);
+  box.scrollIntoView({behavior:"smooth", block:"start"});
+}
+
+function aApply(recs, affected){
+  affected=affected||{};
+  recs.forEach(r=>{
+    const nm=CAT[r.key].name, ck=CAT[r.key].ck;
+    let note=r.note||"";
+    if(affected[r.key]){ note=(note?note+" · ":"")+"⚠ mit Arzt/Apotheke klären ("+affected[r.key].join("; ")+")"; }
+    let ex = state.plan.find(p=> p.name.toLowerCase()===nm.toLowerCase() || (ck && nutKeysOf(p.name).indexOf(ck)>=0));
+    if(ex){ ex.slots=[r.slot]; if(note) ex.note=note; }
+    else { state.plan.push({ id:uid(), name:nm, dose:"", slots:[r.slot], note:note }); }
+  });
+  save();
+  mode="plan";
+  document.querySelectorAll(".tab").forEach(x=> x.classList.toggle("active", x.dataset.mode==="plan"));
+  render();
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+function aCopySummary(res, med){
+  med=med||{block:[],caution:[]};
+  let t="Bioenergetische Frequenzarbeit – Analyse-Zusammenfassung\n\n";
+  const syms=[...aSel].map(i=>SYMPTOMS_A[i].name);
+  t+="Beschwerden: "+(syms.length?syms.join(", "):"keine angegeben")+"\n\n";
+  const meds=[...aMed].map(i=>MED_CATS[i].label);
+  t+="Medikamente / Vorerkrankungen: "+(meds.length?meds.join(", "):"keine angegeben")+(aMedFree?(" | weitere: "+aMedFree):"")+"\n\n";
+  t+="Blutwerte:\n";
+  if(res.blood.length){ res.blood.forEach(b=>{ t+=" - "+b.label+": "+b.val+" "+b.unit+" ("+(b.status==="ok"?"im Zielbereich":b.status)+")\n"; }); }
+  else { t+=" - keine eingetragen\n"; }
+  t+="\nApp-Empfehlung"+((med.block&&med.block.length)?" (NICHT automatisch uebernommen wegen Medikamenten)":"")+":\n";
+  SLOTS.forEach(sl=>{ const r=res.recs.filter(x=>x.slot===sl.id); if(r.length) t+=" "+sl.label+": "+r.map(x=>x.name).join(", ")+"\n"; });
+  const flags=[...(med.block||[]),...(med.caution||[])];
+  if(flags.length){ t+="\n⚠ Supplement-Medikamenten-Wechselwirkungen prüfen wegen: "+flags.map(m=>m.label).join(", ")+"\n"; }
+  t+="\nBitte ärztlich gegenprüfen, besonders die Wechselwirkungen mit Medikamenten.";
+  const done=()=>{ const el=document.getElementById("aCopy"); if(el){ el.textContent="✓ Kopiert – einfügen"; } };
+  if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(t).then(done).catch(()=>window.prompt("Markieren & kopieren:", t)); }
+  else { window.prompt("Markieren & kopieren:", t); }
+}
+
 /* ═══ NAVIGATION ═══ */
 function render(){
   if(mode==='heute') renderHeute();
   else if(mode==='plan') renderPlan();
+  else if(mode==='analyse') renderAnalyse();
   else renderVerlauf();
 }
 document.querySelectorAll('.tab').forEach(t=>{
