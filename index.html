@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Supplemente">
-<title>Supplemente v20 — Bioenergetische Frequenzarbeit</title>
+<title>Supplemente v23 — Bioenergetische Frequenzarbeit</title>
 <style>
   :root {
     --royal:    #1565C0;
@@ -202,6 +202,16 @@
   .backup-sub{ font-size:0.8rem; color:#5a6b7c; margin-bottom:0.6rem; line-height:1.4; }
   .backup-row{ display:flex; gap:0.5rem; }
   .backup-row .a-btn2{ flex:1; }
+  .backup-status{ font-size:0.78rem;color:#256b3b;font-weight:700;margin-top:0.4rem;min-height:1em; }
+  .reset-all-wrap{ text-align:center; margin-top:1.3rem; }
+  .reset-all{ font-size:0.82rem; color:#c0392b; background:none; border:none; text-decoration:underline; cursor:pointer; padding:0.4rem 0.6rem; }
+  .ui-ov{ position:fixed; inset:0; background:rgba(15,30,50,0.5); display:flex; align-items:center; justify-content:center; z-index:9999; padding:1.2rem; }
+  .ui-box{ background:#fff; border-radius:16px; padding:1.2rem 1.1rem; max-width:340px; width:100%; box-shadow:0 14px 44px rgba(0,0,0,0.28); }
+  .ui-msg{ font-size:0.95rem; color:#21364a; line-height:1.45; white-space:pre-line; margin-bottom:1.1rem; }
+  .ui-btns{ display:flex; gap:0.6rem; }
+  .ui-btns button{ flex:1; padding:0.75rem; border-radius:11px; border:none; font-size:0.9rem; font-weight:700; cursor:pointer; }
+  .ui-no{ background:#e9eef3; color:#41566b; }
+  .ui-yes{ background:var(--royal,#1565C0); color:#fff; }
 </style>
 </head>
 <body>
@@ -385,6 +395,21 @@ function todayItems(){
   return out;
 }
 
+function uiConfirm(message, onYes){
+  const ov=document.createElement('div'); ov.className='ui-ov';
+  const box=document.createElement('div'); box.className='ui-box';
+  const msg=document.createElement('div'); msg.className='ui-msg'; msg.textContent=message;
+  const btns=document.createElement('div'); btns.className='ui-btns';
+  const no=document.createElement('button'); no.className='ui-no'; no.textContent='Abbrechen';
+  const yes=document.createElement('button'); yes.className='ui-yes'; yes.textContent='Ja, weiter';
+  btns.appendChild(no); btns.appendChild(yes);
+  box.appendChild(msg); box.appendChild(btns); ov.appendChild(box);
+  function close(){ try{ document.body.removeChild(ov); }catch(e){} }
+  no.onclick=close;
+  ov.onclick=(e)=>{ if(e.target===ov) close(); };
+  yes.onclick=()=>{ close(); try{ onYes(); }catch(e){} };
+  document.body.appendChild(ov);
+}
 function renderHeute(){
   headTitel.textContent = 'Supplemente · Heute';
   const items = todayItems();
@@ -436,11 +461,19 @@ function renderHeute(){
   });
   const rb = document.getElementById('resetDay');
   rb.onclick = ()=>{
-    let ok=true; try{ ok = window.confirm('Alle Häkchen von heute zurücksetzen?'); }catch(e){ ok=true; }
-    if(ok){ if(!state.log) state.log={}; delete state.log[todayKey()]; save(); renderHeute(); }
+    uiConfirm('Alle Häkchen von heute zurücksetzen?', ()=>{ if(!state.log) state.log={}; delete state.log[todayKey()]; save(); renderHeute(); });
   };
 }
 
+function resetAll(){
+  uiConfirm('Wirklich ALLES zurücksetzen?\n\nPlan, Verlauf, Medikamente und Notizen werden gelöscht. Das kann nicht rückgängig gemacht werden.\n\nTipp: Vorher ein Backup speichern.', ()=>{
+    state=normalizeState({ plan:[], log:{}, meds:[], medsFree:'', seeded:true, demoCleared:true });
+    aMed=new Set(); aMedFree=''; aSel=new Set(); aBlood={};
+    save(); mode='plan';
+    document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active', x.dataset.mode==='plan'));
+    render(); window.scrollTo({top:0,behavior:'smooth'});
+  });
+}
 /* ═══ PLAN ═══ */
 function renderPlan(){
   headTitel.textContent = 'Supplemente · Plan';
@@ -467,7 +500,8 @@ function renderPlan(){
     });
   }
   if(!editing){ html += `<button class="add-btn" id="addBtn">＋ Supplement hinzufügen</button>`; }
-  if(!editing && state.plan.length){ html += `<button class="a-btn2" id="pdfBtn" style="width:100%;margin-top:0.5rem;">📄 Plan als PDF / senden</button>`; }
+  if(!editing && state.plan.length){ html += `<button class="a-btn2" id="pdfBtn" style="width:100%;margin-top:0.5rem;">📄 Plan als PDF / senden</button>`; html += backupSectionHtml(); }
+  if(!editing && (state.plan.length || (state.meds&&state.meds.length) || (state.log&&Object.keys(state.log).length))){ html += `<div class="reset-all-wrap"><button class="reset-all" id="resetAllBtn">Alles zurücksetzen</button></div>`; }
   content.innerHTML = html;
   bindPlan();
 }
@@ -531,6 +565,8 @@ function planForm(){
 }
 
 function bindPlan(){
+  bindBackup();
+  { const ra=document.getElementById('resetAllBtn'); if(ra) ra.onclick=resetAll; }
   const addBtn = document.getElementById('addBtn');
   if(addBtn) addBtn.onclick = ()=>{ editing='new'; formSlots=[]; renderPlan(); window.scrollTo({top:0,behavior:'smooth'}); };
   const pdfBtn = document.getElementById('pdfBtn');
@@ -582,10 +618,37 @@ function dataDownload(blob, filename){
     setTimeout(()=>{ try{ document.body.removeChild(a); }catch(e){} URL.revokeObjectURL(url); }, 100);
   }catch(e){ try{ alert('Sichern nicht möglich: '+e.message); }catch(_){} }
 }
-function exportData(){
-  const data={ app:'supplemente', version:1, exported:new Date().toISOString(), plan:state.plan, log:state.log, meds:state.meds, medsFree:state.medsFree };
-  const blob=new Blob([JSON.stringify(data,null,2)], { type:'application/json' });
-  dataDownload(blob, 'Supplemente_Backup_'+todayKey()+'.json');
+let backupFolderHandle=null;
+function idbOpen(){ return new Promise((res,rej)=>{ const r=indexedDB.open('supplemente_db',1); r.onupgradeneeded=()=>{ try{ r.result.createObjectStore('handles'); }catch(e){} }; r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); }
+function idbSetH(h){ return idbOpen().then(db=>new Promise((res,rej)=>{ const tx=db.transaction('handles','readwrite'); tx.objectStore('handles').put(h,'backupFolder'); tx.oncomplete=res; tx.onerror=()=>rej(tx.error); })); }
+function idbGetH(){ return idbOpen().then(db=>new Promise((res,rej)=>{ const tx=db.transaction('handles','readonly'); const rq=tx.objectStore('handles').get('backupFolder'); rq.onsuccess=()=>res(rq.result||null); rq.onerror=()=>rej(rq.error); })); }
+function idbDelH(){ return idbOpen().then(db=>new Promise((res,rej)=>{ const tx=db.transaction('handles','readwrite'); tx.objectStore('handles').delete('backupFolder'); tx.oncomplete=res; tx.onerror=()=>rej(tx.error); })); }
+(function(){ try{ if(typeof window!=='undefined' && 'showDirectoryPicker' in window){ idbGetH().then(h=>{ if(h) backupFolderHandle=h; }).catch(()=>{}); } }catch(e){} })();
+function backupJSON(){ const data={ app:'supplemente', version:1, exported:new Date().toISOString(), plan:state.plan, log:state.log, meds:state.meds, medsFree:state.medsFree }; return JSON.stringify(data,null,2); }
+function flashBackup(msg){ const el=document.getElementById('bkStatus'); if(el){ el.textContent='✓ '+msg; setTimeout(()=>{ const e2=document.getElementById('bkStatus'); if(e2 && e2.textContent==='✓ '+msg) e2.textContent=''; }, 5000); } }
+async function saveToFolder(){
+  if(!backupFolderHandle) return false;
+  try{
+    const opts={mode:'readwrite'};
+    let perm=await backupFolderHandle.queryPermission(opts);
+    if(perm!=='granted') perm=await backupFolderHandle.requestPermission(opts);
+    if(perm!=='granted'){ backupFolderHandle=null; try{ await idbDelH(); }catch(e){} return false; }
+    const fh=await backupFolderHandle.getFileHandle('Supplemente_Backup_'+todayKey()+'.json', { create:true });
+    const w=await fh.createWritable(); await w.write(backupJSON()); await w.close();
+    return true;
+  }catch(e){ return false; }
+}
+async function exportData(){
+  if(backupFolderHandle){ if(await saveToFolder()){ flashBackup('Im verbundenen Ordner gespeichert'); return; } }
+  if(typeof window!=='undefined' && 'showDirectoryPicker' in window){
+    try{
+      const h=await window.showDirectoryPicker({ mode:'readwrite' });
+      backupFolderHandle=h; try{ await idbSetH(h); }catch(e){}
+      if(await saveToFolder()){ flashBackup('Ordner verbunden – ab jetzt automatisch hierhin'); return; }
+    }catch(e){ if(e && e.name==='AbortError') return; }
+  }
+  dataDownload(new Blob([backupJSON()],{type:'application/json'}), 'Supplemente_Backup_'+todayKey()+'.json');
+  flashBackup('Im Download-Ordner gespeichert');
 }
 function importData(file){
   const r=new FileReader();
@@ -593,21 +656,22 @@ function importData(file){
     let data; try{ data=JSON.parse(String(r.result||'')); }catch(e){ alert('Diese Datei ist keine gültige Backup-Datei.'); return; }
     if(!data || !Array.isArray(data.plan)){ alert('Diese Datei ist keine gültige Supplemente-Sicherung.'); return; }
     const n=data.plan.length;
-    let ok=true; try{ ok=window.confirm('Backup laden? Es enthält '+n+' Supplement'+(n===1?'':'e')+'. Deine aktuellen Daten werden überschrieben.'); }catch(e){ ok=true; }
-    if(!ok) return;
-    state=normalizeState({ plan:data.plan, log:(data.log&&typeof data.log==='object')?data.log:{}, meds:Array.isArray(data.meds)?data.meds:[], medsFree:typeof data.medsFree==='string'?data.medsFree:'', seeded:true, demoCleared:true });
-    aMed=new Set(state.meds||[]); aMedFree=state.medsFree||''; aSel=new Set(); aBlood={};
-    save(); mode='plan';
-    document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active', x.dataset.mode==='plan'));
-    render(); window.scrollTo({top:0,behavior:'smooth'});
+    uiConfirm('Backup laden? Es enthält '+n+' Supplement'+(n===1?'':'e')+'. Deine aktuellen Daten werden überschrieben.', ()=>{
+      state=normalizeState({ plan:data.plan, log:(data.log&&typeof data.log==='object')?data.log:{}, meds:Array.isArray(data.meds)?data.meds:[], medsFree:typeof data.medsFree==='string'?data.medsFree:'', seeded:true, demoCleared:true });
+      aMed=new Set(state.meds||[]); aMedFree=state.medsFree||''; aSel=new Set(); aBlood={};
+      save(); mode='plan';
+      document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active', x.dataset.mode==='plan'));
+      render(); window.scrollTo({top:0,behavior:'smooth'});
+    });
   };
   r.readAsText(file);
 }
 function backupSectionHtml(){
   return '<div class="backup"><div class="backup-h">Sicherung</div>'
-    +'<div class="backup-sub">Mach ab und zu ein Backup – z. B. vor einem Handywechsel. „Speichern" legt eine Datei ab, „Laden" stellt sie wieder her.</div>'
+    +'<div class="backup-sub">„Speichern" legt eine Sicherungsdatei ab – am PC (Chrome/Edge) automatisch in deinen gewählten Ordner, am Handy im Download-Ordner. „Laden" stellt ein Backup wieder her.</div>'
     +'<div class="backup-row"><button class="a-btn2" id="bkExport">📥 Backup speichern</button>'
-    +'<label class="a-btn2 file"><input type="file" id="bkImport" accept="application/json,.json" hidden>📤 Backup laden</label></div></div>';
+    +'<label class="a-btn2 file"><input type="file" id="bkImport" accept="application/json,.json" hidden>📤 Backup laden</label></div>'
+    +'<div id="bkStatus" class="backup-status"></div></div>';
 }
 function bindBackup(){
   const ex=document.getElementById('bkExport'); if(ex) ex.onclick=exportData;
@@ -620,8 +684,7 @@ function renderVerlauf(){
 
   if(total===0){
     html += `<div class="empty"><div class="big">📅</div><p>Sobald du Supplemente im Plan hast und abhakst, füllt sich hier dein Verlauf.</p></div>`;
-    html += backupSectionHtml();
-    content.innerHTML = html; bindBackup(); return;
+    content.innerHTML = html; return;
   }
 
   const now = new Date();
@@ -639,8 +702,7 @@ function renderVerlauf(){
       <div class="vnum">${Math.min(done,total)}/${total}</div>
     </div>`;
   }
-  html += backupSectionHtml();
-  content.innerHTML = html; bindBackup();
+  content.innerHTML = html;
 }
 
 /* ═══ ANALYSE — Beschwerden + Blutwerte → Plan (offline, regelbasiert) ═══ */
