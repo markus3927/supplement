@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Supplemente">
-<title>Supplemente v23 — Bioenergetische Frequenzarbeit</title>
+<title>Supplemente v24 — Bioenergetische Frequenzarbeit</title>
 <style>
   :root {
     --royal:    #1565C0;
@@ -500,7 +500,8 @@ function renderPlan(){
     });
   }
   if(!editing){ html += `<button class="add-btn" id="addBtn">＋ Supplement hinzufügen</button>`; }
-  if(!editing && state.plan.length){ html += `<button class="a-btn2" id="pdfBtn" style="width:100%;margin-top:0.5rem;">📄 Plan als PDF / senden</button>`; html += backupSectionHtml(); }
+  if(!editing && state.plan.length){ html += `<button class="a-btn2" id="pdfBtn" style="width:100%;margin-top:0.5rem;">📄 Plan als PDF / senden</button>`; }
+  if(!editing){ html += backupSectionHtml(); }
   if(!editing && (state.plan.length || (state.meds&&state.meds.length) || (state.log&&Object.keys(state.log).length))){ html += `<div class="reset-all-wrap"><button class="reset-all" id="resetAllBtn">Alles zurücksetzen</button></div>`; }
   content.innerHTML = html;
   bindPlan();
