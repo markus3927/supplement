@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Supplemente">
-<title>Supplemente v16 — Bioenergetische Frequenzarbeit</title>
+<title>Supplemente v19 — Bioenergetische Frequenzarbeit</title>
 <style>
   :root {
     --royal:    #1565C0;
@@ -194,6 +194,9 @@
   .mode-btn{ font-size:0.78rem; font-weight:700; color:#fff; background:#1565C0; border:none; border-radius:8px; padding:0.32rem 0.7rem; cursor:pointer; }
   .mode-link{ font-size:0.78rem; font-weight:600; color:#1565C0; text-decoration:underline; cursor:pointer; }
   .mode-ich{ justify-content:flex-end; }
+  .mode-seg{ display:inline-flex; border:1px solid #1565C0; border-radius:8px; overflow:hidden; }
+  .mode-seg .seg{ font-size:0.78rem; font-weight:700; padding:0.32rem 0.7rem; border:none; background:#fff; color:#1565C0; cursor:pointer; }
+  .mode-seg .seg.on{ background:#1565C0; color:#fff; }
 </style>
 </head>
 <body>
@@ -208,8 +211,6 @@
   </div>
   <div class="accent"></div>
 </header>
-<div id="modeBar"></div>
-
 
 <main>
   <div class="tabs">
@@ -228,9 +229,7 @@
 
 <script>
 /* ═══ SPEICHER (localStorage mit Fallback) ═══ */
-const _qs = new URLSearchParams(location.search);
-let CLIENT_MODE = _qs.has('kunde') || location.hash.indexOf('kunde')>=0;
-let KEY = CLIENT_MODE ? 'supplemente_kunde' : 'supplemente_v1';
+const KEY = 'supplemente_v1';
 let memFallback = null;
 function load(){
   try { const raw = localStorage.getItem(KEY); return raw ? JSON.parse(raw) : null; }
@@ -347,6 +346,11 @@ function normalizeState(st){
   if(typeof st.medsFree !== "string") st.medsFree = "";
   if(!st.log || typeof st.log !== "object") st.log = {};
   st.plan.forEach(p=>{ if(p && p.note){ const c=p.note.replace(/\s*·?\s*⚠\s*mit Arzt\/Apotheke (?:abkl[aä]ren|kl[aä]ren)[\s\S]*$/,"").trim(); if(c!==p.note) p.note=c; } });
+  if(!st.demoCleared){
+    const demoSig = ['Vitamin D3 + K2|4000 IE|zur Mahlzeit mit Fett','Omega-3|2 Kapseln|zum Essen','Magnesium|300 mg|entspannend, abends gut'];
+    st.plan = st.plan.filter(p=> demoSig.indexOf((p.name||'')+'|'+(p.dose||'')+'|'+(p.note||'')) < 0 );
+    st.demoCleared = true;
+  }
   return st;
 }
 let state = normalizeState(load());
@@ -593,7 +597,6 @@ function renderVerlauf(){
   content.innerHTML = html;
 }
 
-
 /* ═══ ANALYSE — Beschwerden + Blutwerte → Plan (offline, regelbasiert) ═══ */
 const A_W = { sehrhoch:4, hoch:3, mittel:2, niedrig:1 };
 
@@ -760,35 +763,7 @@ function medItemWarnHtml(name){
   return '<div class="pi-warn">\u26a0 mit Arzt/Apotheke abkl\u00e4ren'+(w.labels.length?" ("+w.labels.map(esc).join(", ")+")":"")+'</div>';
 }
 function clearMeds(){ state.meds=[]; state.medsFree=""; aMed=new Set(); aMedFree=""; save(); render(); }
-function resetClient(){
-  let ok=true; try{ ok=window.confirm('Für einen neuen Kunden zurücksetzen? Plan, Medikamente und Häkchen werden geleert.'); }catch(e){ ok=true; }
-  if(!ok) return;
-  state.plan=[]; state.meds=[]; state.medsFree=""; state.log={}; state.seeded=true;
-  aMed=new Set(); aMedFree=""; aSel=new Set(); aBlood={};
-  save(); mode='heute';
-  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active', x.dataset.mode==='heute'));
-  render(); window.scrollTo({top:0,behavior:'smooth'});
-}
-function switchMode(toClient){
-  save();
-  CLIENT_MODE = !!toClient;
-  KEY = CLIENT_MODE ? 'supplemente_kunde' : 'supplemente_v1';
-  try{ history.replaceState(null, '', CLIENT_MODE ? (location.pathname+'?kunde') : location.pathname); }catch(e){}
-  state = normalizeState(load());
-  aSel=new Set(); aBlood={}; aMed=new Set(state.meds||[]); aMedFree=state.medsFree||"";
-  editing=null; mode='heute';
-  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active', x.dataset.mode==='heute'));
-  render(); window.scrollTo({top:0,behavior:'smooth'});
-}
-function goPersonal(){ switchMode(false); }
-function renderModeBar(){
-  const mb=document.getElementById('modeBar'); if(!mb) return;
-  if(CLIENT_MODE){
-    mb.innerHTML='<div class="mode-kunde"><span class="mode-badge">👤 Kunden-Modus</span><button class="mode-btn" onclick="resetClient();return false;">Neuer Kunde</button><a class="mode-link" onclick="switchMode(false);return false;">Zurück zu meinen Daten</a></div>';
-  } else {
-    mb.innerHTML='';
-  }
-}
+
 function medClearLink(){ return ' <a href="#" onclick="clearMeds();return false;" style="display:inline-block;margin-top:6px;font-size:0.78rem;font-weight:700;color:#1565C0;text-decoration:underline;">Medikamente entfernen</a>'; }
 function medBanner(){
   const meds=activeMeds(); if(!meds.length) return "";
@@ -1031,7 +1006,6 @@ function aCopySummary(res, med){
 
 /* ═══ NAVIGATION ═══ */
 function render(){
-  renderModeBar();
   if(mode==='heute') renderHeute();
   else if(mode==='plan') renderPlan();
   else if(mode==='analyse') renderAnalyse();
@@ -1045,6 +1019,7 @@ document.querySelectorAll('.tab').forEach(t=>{
     window.scrollTo({top:0,behavior:'smooth'});
   };
 });
+
 
 render();
 
